@@ -173,21 +173,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
     <div class="legend-box">
       <strong>Como ler:</strong>
       <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Top 3 em dourado</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>&#10003; Aprovado = &ge; 43 acertos</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>&#10007; Reprovado = abaixo de 43 acertos</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>&#10003; Nota A = &ge; 43 acertos</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>&#10007; Abaixo de A = &lt; 43 acertos</div>
     </div>
     <div class="ranking-card">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
         <div>
           <h2 style="font-size:18px;font-weight:900;color:var(--navy);margin-bottom:2px">UERJ &mdash; Simulado 1 &middot; 25/02/2026</h2>
-          <p style="font-size:13px;color:var(--text3)">Total: <span id="totalS1">0</span> &middot; Aprovados: <span id="aprovS1" style="color:var(--green);font-weight:700">0</span> &middot; Reprovados: <span id="reprovS1" style="color:var(--red);font-weight:700">0</span></p>
+          <p style="font-size:13px;color:var(--text3)">Total: <span id="totalS1">0</span> &middot; Nota A: <span id="aprovS1" style="color:var(--green);font-weight:700">0</span> &middot; Abaixo de A: <span id="reprovS1" style="color:var(--red);font-weight:700">0</span></p>
         </div>
         <input class="search-input" style="max-width:280px;margin:0" type="text" id="searchS1" placeholder="&#128269; Buscar pelo nome..." oninput="renderS1()">
       </div>
       <div class="ranking-filters">
         <button class="filter-btn active" onclick="setFS1('todos',this)">&#127942; Todos<span class="fb-desc">Turma completa</span></button>
-        <button class="filter-btn" onclick="setFS1('aprov',this)">&#9989; Aprovados<span class="fb-desc">&ge; 43 acertos</span></button>
-        <button class="filter-btn" onclick="setFS1('reprov',this)">&#10060; Reprovados<span class="fb-desc">Precisam melhorar</span></button>
+        <button class="filter-btn" onclick="setFS1('aprov',this)">&#9989; Nota A<span class="fb-desc">&ge; 43 acertos</span></button>
+        <button class="filter-btn" onclick="setFS1('reprov',this)">&#10060; Abaixo de A<span class="fb-desc">Precisam melhorar</span></button>
         <button class="filter-btn" onclick="setFS1('unidade',this)">&#127979; Por Unidade<span class="fb-desc">Filtrar unidade</span></button>
       </div>
       <div id="uniWrapS1" style="display:none;margin-bottom:14px">
@@ -219,21 +219,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
     <div class="legend-box">
       <strong>Como ler:</strong>
       <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Top 3 em dourado</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>&#10003; Aprovado = &ge; 43 acertos</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>&#10007; Reprovado = abaixo de 43 acertos</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>&#10003; Nota A = &ge; 43 acertos</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>&#10007; Abaixo de A = &lt; 43 acertos</div>
     </div>
     <div class="ranking-card">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
         <div>
           <h2 style="font-size:18px;font-weight:900;color:var(--navy);margin-bottom:2px">UERJ &mdash; Simulado 2 &middot; 04/03/2026</h2>
-          <p style="font-size:13px;color:var(--text3)">Total: <span id="totalS2">0</span> &middot; Aprovados: <span id="aprovS2" style="color:var(--green);font-weight:700">0</span> &middot; Reprovados: <span id="reprovS2" style="color:var(--red);font-weight:700">0</span></p>
+          <p style="font-size:13px;color:var(--text3)">Total: <span id="totalS2">0</span> &middot; Nota A: <span id="aprovS2" style="color:var(--green);font-weight:700">0</span> &middot; Abaixo de A: <span id="reprovS2" style="color:var(--red);font-weight:700">0</span></p>
         </div>
         <input class="search-input" style="max-width:280px;margin:0" type="text" id="searchS2" placeholder="&#128269; Buscar pelo nome..." oninput="renderS2()">
       </div>
       <div class="ranking-filters">
         <button class="filter-btn active" onclick="setFS2('todos',this)">&#127942; Todos<span class="fb-desc">Turma completa</span></button>
-        <button class="filter-btn" onclick="setFS2('aprov',this)">&#9989; Aprovados<span class="fb-desc">&ge; 43 acertos</span></button>
-        <button class="filter-btn" onclick="setFS2('reprov',this)">&#10060; Reprovados<span class="fb-desc">Precisam melhorar</span></button>
+        <button class="filter-btn" onclick="setFS2('aprov',this)">&#9989; Nota A<span class="fb-desc">&ge; 43 acertos</span></button>
+        <button class="filter-btn" onclick="setFS2('reprov',this)">&#10060; Abaixo de A<span class="fb-desc">Precisam melhorar</span></button>
         <button class="filter-btn" onclick="setFS2('unidade',this)">&#127979; Por Unidade<span class="fb-desc">Filtrar unidade</span></button>
       </div>
       <div id="uniWrapS2" style="display:none;margin-bottom:14px">
@@ -1035,7 +1035,7 @@ function renderExam(data, bodyId, statsId, totalId, aprovId, reprovId, filtro, s
     '<div class="stat-item"><div class="s-label">Total de Alunos</div><div class="s-val">' + data.length + '</div><div class="s-hint">participantes</div></div>' +
     '<div class="stat-item"><div class="s-label">M&eacute;dia de Acertos</div><div class="s-val">' + avg + '</div><div class="s-hint">de 60 quest&otilde;es</div></div>' +
     '<div class="stat-item"><div class="s-label">Melhor Resultado</div><div class="s-val">' + max + '<span style="font-size:16px;font-weight:600">/60</span></div><div class="s-hint">acertos</div></div>' +
-    '<div class="stat-item"><div class="s-label">% Aprovados</div><div class="s-val">' + pctAprov + '<span style="font-size:16px;font-weight:600">%</span></div><div class="s-hint">&ge; 43 acertos</div></div>';
+    '<div class="stat-item"><div class="s-label">% Nota A</div><div class="s-val">' + pctAprov + '<span style="font-size:16px;font-weight:600">%</span></div><div class="s-hint">&ge; 43 acertos</div></div>';
 }
 
 // ============================================================
@@ -1174,7 +1174,7 @@ function buildNotas(a, avgs, pos, N) {
     '<div class="stat-grid" style="margin-top:0">' +
     '<div class="stat-item"><div class="s-label">Total de Acertos</div><div class="s-val">' + a.tot + '</div><div class="s-hint">de 60 quest\u00f5es</div></div>' +
     '<div class="stat-item"><div class="s-label">Posi\u00e7\u00e3o</div><div class="s-val">' + pos + '\u00ba</div><div class="s-hint">de ' + N + ' alunos</div></div>' +
-    '<div class="stat-item"><div class="s-label">Conceito</div><div class="s-val">' + a.conc + '</div><div class="s-hint">' + (a.tot>=43?'Aprovado':'Reprovado') + '</div></div>' +
+    '<div class="stat-item"><div class="s-label">Conceito</div><div class="s-val">' + a.conc + '</div><div class="s-hint">' + (a.tot>=43?'Nota A':'Abaixo de A') + '</div></div>' +
     '<div class="stat-item"><div class="s-label">Aproveitamento</div><div class="s-val">' + Math.round(a.tot/60*100) + '<span style="font-size:16px">%</span></div><div class="s-hint">do total</div></div></div>';
 }
 
@@ -1363,29 +1363,155 @@ function buildRadarHTML(a, sorted) {
 
 // Tab 3: Chance
 function buildChance(a, sorted, pos, N) {
-  const pct = Math.round((N - pos) / N * 100);
-  const median = sorted[Math.floor(N/2)]?.tot || 0;
-  const top10 = sorted[Math.floor(N*0.1)]?.tot || 0;
+  const META = 43;
+  const atingiu = a.tot >= META;
+  const faltam  = META - a.tot;
+  const pctMeta = Math.min(100, Math.round(a.tot / META * 100));
+  const surplus = a.tot - META;
+
+  // Cor do progresso baseada na distância da meta
+  const barCol = atingiu ? '#16a34a'
+    : pctMeta >= 85 ? '#d97706'
+    : pctMeta >= 60 ? '#f59e0b'
+    : '#dc2626';
+
+  // Mensagem de status
+  let statusBg, statusBorder, statusIcon, statusText;
+  if (atingiu) {
+    statusBg = '#f0fdf4'; statusBorder = '#86efac'; statusIcon = '&#127942;';
+    statusText = 'Nota A atingida! Voc\u00ea est\u00e1 <strong>' + surplus + ' acerto' + (surplus!==1?'s':'') + ' acima</strong> do m\u00ednimo.';
+  } else if (faltam <= 3) {
+    statusBg = '#fffbeb'; statusBorder = '#fde68a'; statusIcon = '&#9889;';
+    statusText = 'Muito perto! Faltam apenas <strong>' + faltam + ' acerto' + (faltam!==1?'s':'') + '</strong> para a Nota A.';
+  } else if (faltam <= 8) {
+    statusBg = '#fffbeb'; statusBorder = '#fde68a'; statusIcon = '&#128170;';
+    statusText = 'Quase l\u00e1! Faltam <strong>' + faltam + ' acertos</strong> para a Nota A.';
+  } else {
+    statusBg = '#fef2f2'; statusBorder = '#fca5a5'; statusIcon = '&#128218;';
+    statusText = 'Faltam <strong>' + faltam + ' acertos</strong> para atingir a Nota A (43 acertos = 100%).';
+  }
+
+  // Disciplinas abaixo do mínimo e ganho potencial
+  const abaixoMin = DISC_INFO.filter(d => a[d.key] < d.min);
+  const ganhoMaximo = abaixoMin.reduce((s, d) => s + (d.min - a[d.key]), 0);
+  const projetado = a.tot + ganhoMaximo;
+
+  let discRows = '';
+  DISC_INFO.forEach(d => {
+    const sc = a[d.key];
+    const falta = Math.max(0, d.min - sc);
+    const pctDisc = Math.min(100, Math.round(sc / d.min * 100));
+    const col = sc >= d.min ? '#16a34a' : '#dc2626';
+    discRows += '<tr>' +
+      '<td><strong>' + d.label + '</strong></td>' +
+      '<td style="text-align:center;font-weight:800;color:' + col + '">' + sc + '/' + d.max + '</td>' +
+      '<td style="text-align:center;color:var(--text3)">' + d.min + '</td>' +
+      '<td style="text-align:center;color:' + col + ';font-weight:900">' + (falta === 0 ? '<span style="color:#16a34a">&#10003;</span>' : '+' + falta + ' needed') + '</td>' +
+      '<td style="min-width:80px"><div style="height:7px;background:#e5e9f0;border-radius:4px;overflow:hidden">' +
+        '<div style="width:' + pctDisc + '%;height:100%;background:' + col + ';border-radius:4px"></div></div></td>' +
+      '</tr>';
+  });
+
+  // Ranking visual
   const bw = Math.round((N - pos + 1) / N * 100);
-  const pc = pos <= 10 ? '#16a34a' : pos <= 50 ? '#1d4ed8' : pos <= 100 ? '#a16207' : '#dc2626';
+  const pcRank = pos <= 10 ? '#16a34a' : pos <= 50 ? '#1d4ed8' : pos <= 100 ? '#a16207' : '#dc2626';
+  const median = sorted[Math.floor(N/2)]?.tot || 0;
+  const top10ref = sorted[Math.floor(N*0.1)]?.tot || 0;
+  const notaA_count = sorted.filter(x => x.tot >= META).length;
 
   document.getElementById('pPlano').innerHTML =
-    '<div class="card" style="margin-top:20px"><div class="card-head"><h2>&#127919; Posi\u00e7\u00e3o no Ranking</h2></div>' +
-    '<div style="display:flex;gap:20px;flex-wrap:wrap;margin:16px 0">' +
-    '<div class="stat-item" style="flex:1;min-width:140px"><div class="s-label">Posi\u00e7\u00e3o</div><div class="s-val" style="color:' + pc + '">' + pos + '\u00ba</div><div class="s-hint">de ' + N + ' alunos</div></div>' +
-    '<div class="stat-item" style="flex:1;min-width:140px"><div class="s-label">Percentil</div><div class="s-val">' + pct + '</div><div class="s-hint">Top ' + (100-pct) + '%</div></div>' +
-    '<div class="stat-item" style="flex:1;min-width:140px"><div class="s-label">Total</div><div class="s-val">' + a.tot + '</div><div class="s-hint">de 60 acertos</div></div>' +
-    '<div class="stat-item" style="flex:1;min-width:140px"><div class="s-label">Conceito</div><div class="s-val">' + a.conc + '</div><div class="s-hint">' + (a.tot>=43?'Aprovado':'Reprovado') + '</div></div></div>' +
-    '<div style="margin:20px 0"><p style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px">Posi\u00e7\u00e3o visual (' + pos + '\u00ba de ' + N + ')</p>' +
-    '<div style="background:#e5e9f0;height:22px;border-radius:11px;overflow:hidden"><div style="width:' + bw + '%;height:100%;background:' + pc + ';border-radius:11px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px">' +
-    '<span style="font-size:11px;font-weight:800;color:white">' + pos + '\u00ba</span></div></div>' +
-    '<div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--text3);font-weight:600"><span>1\u00ba</span><span>' + Math.floor(N/2) + '\u00ba (mediana)</span><span>' + N + '\u00ba</span></div></div>' +
-    '<table class="dtable"><thead><tr><th>Refer\u00eancia</th><th>Total</th><th>Diferen\u00e7a</th></tr></thead><tbody>' +
-    '<tr><td>Voc\u00ea</td><td><strong>' + a.tot + '/60</strong></td><td>&mdash;</td></tr>' +
-    '<tr><td>Top 10% (' + Math.ceil(N*0.1) + '\u00ba)</td><td>' + top10 + '/60</td><td style="color:' + (a.tot>=top10?'#16a34a':'#dc2626') + ';font-weight:700">' + (a.tot>=top10?'+':'') + (a.tot-top10) + '</td></tr>' +
-    '<tr><td>Mediana (' + Math.floor(N/2) + '\u00ba)</td><td>' + median + '/60</td><td style="color:' + (a.tot>=median?'#16a34a':'#dc2626') + ';font-weight:700">' + (a.tot>=median?'+':'') + (a.tot-median) + '</td></tr>' +
-    '<tr><td>M\u00ednimo aprovado</td><td>43/60</td><td style="color:' + (a.tot>=43?'#16a34a':'#dc2626') + ';font-weight:700">' + (a.tot>=43?'+':'') + (a.tot-43) + '</td></tr>' +
-    '</tbody></table></div>';
+    '<div style="margin-top:20px">' +
+
+    // ---- Card principal: Chance de Nota A ----
+    '<div class="card">' +
+      '<div class="card-head"><h2>&#127919; Chance de Nota A</h2></div>' +
+      '<p class="card-sub">43 acertos = 100% &mdash; meta m\u00ednima para Nota A</p>' +
+
+      // Status banner
+      '<div style="background:' + statusBg + ';border:1.5px solid ' + statusBorder + ';border-radius:12px;padding:16px 20px;margin:16px 0;display:flex;align-items:center;gap:14px">' +
+        '<span style="font-size:32px">' + statusIcon + '</span>' +
+        '<div><div style="font-size:15px;color:#1a2332">' + statusText + '</div>' +
+        (!atingiu ? '<div style="font-size:12px;color:var(--text3);margin-top:4px">Sua pontua\u00e7\u00e3o atual: <strong>' + a.tot + '</strong> / Meta: <strong>43</strong> acertos</div>' : '') +
+        '</div>' +
+      '</div>' +
+
+      // Barra de progresso principal
+      '<div style="margin:20px 0">' +
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">' +
+          '<span style="font-size:13px;font-weight:800;color:var(--text2)">Progresso para Nota A</span>' +
+          '<span style="font-size:22px;font-weight:900;color:' + barCol + '">' + pctMeta + '%</span>' +
+        '</div>' +
+        '<div style="background:#e5e9f0;height:28px;border-radius:14px;overflow:hidden;position:relative">' +
+          '<div style="width:' + pctMeta + '%;height:100%;background:' + barCol + ';border-radius:14px;transition:.4s;display:flex;align-items:center;justify-content:flex-end;padding-right:12px">' +
+            (pctMeta >= 20 ? '<span style="font-size:12px;font-weight:900;color:white">' + a.tot + ' acertos</span>' : '') +
+          '</div>' +
+          // Marca de 100% (43 acertos)
+          '<div style="position:absolute;top:0;right:0;height:100%;width:2px;background:rgba(0,0,0,0.15)"></div>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;font-weight:700;color:var(--text3)">' +
+          '<span>0 acertos (0%)</span>' +
+          '<span style="color:' + (atingiu ? '#16a34a' : '#d97706') + '">&#9654; Meta: 43 (100%)</span>' +
+          '<span>60 acertos</span>' +
+        '</div>' +
+      '</div>' +
+
+      // Stats de meta
+      '<div class="stat-grid">' +
+        '<div class="stat-item"><div class="s-label">Seus Acertos</div><div class="s-val" style="color:' + barCol + '">' + a.tot + '</div><div class="s-hint">de 60 quest\u00f5es</div></div>' +
+        '<div class="stat-item"><div class="s-label">' + (atingiu ? 'Acima da Meta' : 'Faltam para A') + '</div><div class="s-val" style="color:' + (atingiu ? '#16a34a' : '#dc2626') + '">' + (atingiu ? '+' + surplus : faltam) + '</div><div class="s-hint">acertos</div></div>' +
+        '<div class="stat-item"><div class="s-label">Progresso</div><div class="s-val" style="color:' + barCol + '">' + pctMeta + '<span style="font-size:16px">%</span></div><div class="s-hint">da meta (43)</div></div>' +
+        '<div class="stat-item"><div class="s-label">Conceito</div><div class="s-val">' + a.conc + '</div><div class="s-hint">' + (atingiu ? 'Nota A' : 'Abaixo de A') + '</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    // ---- Card: Por onde ganhar pontos ----
+    (!atingiu ? (
+      '<div class="card">' +
+        '<div class="card-head"><h2>&#128270; Por onde ganhar os ' + faltam + ' acertos que faltam</h2></div>' +
+        '<p class="card-sub">Disciplinas abaixo do m\u00ednimo &mdash; atingir o m\u00ednimo em cada uma acrescentaria ' + ganhoMaximo + ' acertos (' + (a.tot + ganhoMaximo >= META ? '<strong style="color:#16a34a">suficiente para Nota A</strong>' : 'chegando a ' + projetado + '/43') + ')</p>' +
+        (abaixoMin.length === 0
+          ? '<div class="info-box"><h5>&#9989; Todas as disciplinas acima do m\u00ednimo!</h5><p style="font-size:13px;color:var(--text2)">Voc\u00ea j\u00e1 est\u00e1 acima do m\u00ednimo em todas as mat\u00e9rias. Foque em subir ainda mais nas que voc\u00ea j\u00e1 domina.</p></div>'
+          : '<table class="dtable"><thead><tr><th>Disciplina</th><th>Voc\u00ea</th><th>M\u00ednimo</th><th>Precisar\u00e1</th><th>Progresso</th></tr></thead><tbody>' +
+            DISC_INFO.filter(d => a[d.key] < d.min).map(d => {
+              const sc = a[d.key], falta = d.min - sc;
+              const pctD = Math.round(sc / d.min * 100);
+              return '<tr>' +
+                '<td><strong>' + d.label + '</strong></td>' +
+                '<td style="text-align:center;font-weight:900;color:#dc2626">' + sc + '/' + d.max + '</td>' +
+                '<td style="text-align:center;color:var(--text3)">' + d.min + '</td>' +
+                '<td style="text-align:center;color:#d97706;font-weight:900">+' + falta + '</td>' +
+                '<td style="min-width:90px"><div style="height:7px;background:#e5e9f0;border-radius:4px;overflow:hidden">' +
+                  '<div style="width:' + pctD + '%;height:100%;background:#dc2626;border-radius:4px"></div></div>' +
+                  '<span style="font-size:10px;color:var(--text3)">' + pctD + '% do m\u00edn.</span></td>' +
+                '</tr>';
+            }).join('') +
+            '</tbody></table>'
+        ) +
+      '</div>'
+    ) : '') +
+
+    // ---- Card: Posição no ranking ----
+    '<div class="card">' +
+      '<div class="card-head"><h2>&#128202; Posi\u00e7\u00e3o no Ranking</h2></div>' +
+      '<div style="display:flex;gap:14px;flex-wrap:wrap;margin:16px 0">' +
+        '<div class="stat-item" style="flex:1;min-width:130px"><div class="s-label">Posi\u00e7\u00e3o</div><div class="s-val" style="color:' + pcRank + '">' + pos + '\u00ba</div><div class="s-hint">de ' + N + ' alunos</div></div>' +
+        '<div class="stat-item" style="flex:1;min-width:130px"><div class="s-label">Alunos Nota A</div><div class="s-val" style="color:#16a34a">' + notaA_count + '</div><div class="s-hint">de ' + N + ' (' + Math.round(notaA_count/N*100) + '%)</div></div>' +
+        '<div class="stat-item" style="flex:1;min-width:130px"><div class="s-label">Mediana</div><div class="s-val">' + median + '</div><div class="s-hint">acertos na turma</div></div>' +
+        '<div class="stat-item" style="flex:1;min-width:130px"><div class="s-label">Top 10%</div><div class="s-val">' + top10ref + '</div><div class="s-hint">acertos (refer\u00eancia)</div></div>' +
+      '</div>' +
+      '<p style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px">Posi\u00e7\u00e3o visual</p>' +
+      '<div style="background:#e5e9f0;height:20px;border-radius:10px;overflow:hidden"><div style="width:' + bw + '%;height:100%;background:' + pcRank + ';border-radius:10px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px">' +
+        '<span style="font-size:11px;font-weight:800;color:white">' + pos + '\u00ba</span></div></div>' +
+      '<div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--text3);font-weight:600">' +
+        '<span>1\u00ba</span><span>' + Math.floor(N/2) + '\u00ba (mediana)</span><span>' + N + '\u00ba</span></div>' +
+      '<table class="dtable" style="margin-top:16px"><thead><tr><th>Refer\u00eancia</th><th>Total</th><th>Diferen\u00e7a</th></tr></thead><tbody>' +
+      '<tr><td>Voc\u00ea</td><td><strong>' + a.tot + '/60</strong></td><td>&mdash;</td></tr>' +
+      '<tr><td>Meta Nota A</td><td>43/60</td><td style="color:' + (a.tot>=43?'#16a34a':'#dc2626') + ';font-weight:900">' + (a.tot>=43?'+':'') + (a.tot-43) + '</td></tr>' +
+      '<tr><td>Mediana (' + Math.floor(N/2) + '\u00ba)</td><td>' + median + '/60</td><td style="color:' + (a.tot>=median?'#16a34a':'#dc2626') + ';font-weight:700">' + (a.tot>=median?'+':'') + (a.tot-median) + '</td></tr>' +
+      '<tr><td>Top 10% (' + Math.ceil(N*0.1) + '\u00ba)</td><td>' + top10ref + '/60</td><td style="color:' + (a.tot>=top10ref?'#16a34a':'#dc2626') + ';font-weight:700">' + (a.tot>=top10ref?'+':'') + (a.tot-top10ref) + '</td></tr>' +
+      '</tbody></table>' +
+    '</div>' +
+    '</div>';
 }
 
 // Tab 4: Análise
