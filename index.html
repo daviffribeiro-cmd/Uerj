@@ -298,6 +298,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
       <button class="tab-btn" onclick="goTab('pPlano',this)">&#127919; Chance</button>
       <button class="tab-btn" onclick="goTab('pAnalise',this)">&#128203; An&aacute;lise</button>
       <button class="tab-btn" onclick="goTab('pEstudos',this)">&#128218; Plano de Estudos</button>
+      <button class="tab-btn" onclick="goTab('pEvolucao',this)">&#128200; Evolu&#231;&#227;o</button>
     </div>
   </div>
   <div class="page-wrap">
@@ -306,6 +307,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
     <div id="pPlano" class="tab-pane"></div>
     <div id="pAnalise" class="tab-pane"></div>
     <div id="pEstudos" class="tab-pane"></div>
+    <div id="pEvolucao" class="tab-pane"></div>
   </div>
 </div>
 
@@ -1120,10 +1122,11 @@ function openDashboard(a, data, examId) {
   document.getElementById('pNotas').classList.add('active');
 
   buildNotas(a, avgs, pos, N);
-  buildGrafico(a, avgs);
+  buildGrafico(a, avgs, sorted);
   buildChance(a, sorted, pos, N);
   buildAnalise(a, avgs);
   buildPlano(a, avgs);
+  buildEvolucao(a);
   window.scrollTo(0,0);
 }
 
@@ -1176,7 +1179,7 @@ function buildNotas(a, avgs, pos, N) {
 }
 
 // Tab 2: Gráficos (pure SVG — no external deps)
-function buildGrafico(a, avgs) {
+function buildGrafico(a, avgs, sorted) {
   const W = 560, H = 300, padL = 80, padR = 20, padT = 40, padB = 40;
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
@@ -1236,10 +1239,126 @@ function buildGrafico(a, avgs) {
     ${legend}${gridLines}${yLabels}${baseline}${threshLine}${bars}${labels}
   </svg>`;
 
+  const radarHTML = buildRadarHTML(a, sorted || []);
+
   document.getElementById('pGrafico').innerHTML =
     '<div class="card" style="margin-top:20px"><div class="card-head"><h2>&#128200; Gr\u00e1fico de Desempenho</h2></div>' +
     '<p class="card-sub">Azul escuro = voc\u00ea &middot; Azul claro = m\u00e9dia turma &middot; Pontilhado amarelo = m\u00ednimo</p>' +
-    '<div style="padding:8px 0">' + svg + '</div></div>';
+    '<div style="padding:8px 0">' + svg + '</div></div>' +
+    radarHTML;
+}
+
+function buildRadarHTML(a, sorted) {
+  const top10 = sorted.slice(0, Math.min(10, sorted.length));
+  if (!top10.length) return '';
+
+  const W = 480, H = 400;
+  const cx = W / 2, cy = H / 2 + 10;
+  const R = 140;
+  const n = DISC_INFO.length;
+  const levels = 5;
+
+  function axisAngle(i) { return (i / n) * 2 * Math.PI - Math.PI / 2; }
+
+  function toXY(val, maxVal, idx) {
+    const angle = axisAngle(idx);
+    const r = (val / maxVal) * R;
+    return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+  }
+
+  // Grid polygons
+  let grid = '';
+  for (let l = 1; l <= levels; l++) {
+    const pts = DISC_INFO.map((d, i) => {
+      const angle = axisAngle(i);
+      const r = (l / levels) * R;
+      return (cx + r * Math.cos(angle)).toFixed(1) + ',' + (cy + r * Math.sin(angle)).toFixed(1);
+    }).join(' ');
+    grid += '<polygon points="' + pts + '" fill="none" stroke="#e5e9f0" stroke-width="1"/>';
+    // level label on top axis
+    const r = (l / levels) * R;
+    grid += '<text x="' + cx.toFixed(1) + '" y="' + (cy - r - 3).toFixed(1) + '" text-anchor="middle" font-size="9" fill="#8b99ab">' + Math.round(l / levels * 100) + '%</text>';
+  }
+
+  // Axis lines + labels
+  let axes = '';
+  DISC_INFO.forEach((d, i) => {
+    const angle = axisAngle(i);
+    const xe = cx + R * Math.cos(angle);
+    const ye = cy + R * Math.sin(angle);
+    axes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + xe.toFixed(1) + '" y2="' + ye.toFixed(1) + '" stroke="#d1d9e6" stroke-width="1"/>';
+    const lx = cx + (R + 20) * Math.cos(angle);
+    const ly = cy + (R + 20) * Math.sin(angle);
+    const anchor = Math.cos(angle) > 0.1 ? 'start' : Math.cos(angle) < -0.1 ? 'end' : 'middle';
+    axes += '<text x="' + lx.toFixed(1) + '" y="' + (ly + 4).toFixed(1) + '" text-anchor="' + anchor + '" font-size="11" font-weight="700" fill="#4b5a6e">' + d.label.split(' ')[0] + '</text>';
+  });
+
+  // Compute student polygon (normalized to max of each discipline)
+  const sPts = DISC_INFO.map((d, i) => toXY(a[d.key], d.max, i));
+  const sPath = sPts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + ' Z';
+
+  // Compute top10 average polygon
+  const top10AvgPts = DISC_INFO.map((d, i) => {
+    const avg = top10.reduce((s, x) => s + x[d.key], 0) / top10.length;
+    return toXY(avg, d.max, i);
+  });
+  const tPath = top10AvgPts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + ' Z';
+
+  // Score dots + value labels for student
+  const sDots = sPts.map((p, i) => {
+    const sc = a[DISC_INFO[i].key];
+    const pct = Math.round(sc / DISC_INFO[i].max * 100);
+    return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="5" fill="#1e3a5f" stroke="white" stroke-width="1.5"/>' +
+      '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] - 8).toFixed(1) + '" text-anchor="middle" font-size="9" font-weight="700" fill="#1e3a5f">' + pct + '%</text>';
+  }).join('');
+
+  const tDots = top10AvgPts.map(p =>
+    '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4" fill="#fbbf24" stroke="white" stroke-width="1.5"/>'
+  ).join('');
+
+  const topLabel = '<text x="' + cx + '" y="18" text-anchor="middle" font-size="13" font-weight="900" fill="#1e3a5f">Voc\u00ea vs Top 10 \u2014 Radar por Disciplina</text>';
+
+  const svgRadar = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:400px">' +
+    topLabel + grid + axes +
+    '<path d="' + tPath + '" fill="rgba(251,191,36,0.18)" stroke="#fbbf24" stroke-width="2.5"/>' +
+    '<path d="' + sPath + '" fill="rgba(30,58,95,0.22)" stroke="#1e3a5f" stroke-width="2.5"/>' +
+    tDots + sDots +
+    '</svg>';
+
+  const radarLegend =
+    '<div style="display:flex;justify-content:center;gap:32px;margin:12px 0 4px;flex-wrap:wrap">' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<div style="width:14px;height:14px;border-radius:3px;background:rgba(30,58,95,0.22);border:2px solid #1e3a5f;flex-shrink:0"></div>' +
+        '<span style="font-size:13px;font-weight:700;color:#1a2332">' + a.nome.split(' ')[0] + ' (voc\u00ea)</span>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<div style="width:14px;height:14px;border-radius:3px;background:rgba(251,191,36,0.25);border:2px solid #fbbf24;flex-shrink:0"></div>' +
+        '<span style="font-size:13px;font-weight:700;color:#1a2332">M\u00e9dia Top 10 do ranking</span>' +
+      '</div>' +
+    '</div>';
+
+  // Per-discipline comparison table
+  let rows = '';
+  DISC_INFO.forEach(d => {
+    const sc = a[d.key];
+    const avg10 = (top10.reduce((s, x) => s + x[d.key], 0) / top10.length);
+    const pct = Math.round(sc / d.max * 100);
+    const pct10 = Math.round(avg10 / d.max * 100);
+    const diff = sc - avg10;
+    const col = diff >= 0 ? '#16a34a' : '#dc2626';
+    rows += '<tr><td><strong>' + d.label + '</strong></td>' +
+      '<td style="text-align:center">' + sc + '/' + d.max + ' <span style="color:var(--text3);font-size:11px">(' + pct + '%)</span></td>' +
+      '<td style="text-align:center">' + avg10.toFixed(1) + '/' + d.max + ' <span style="color:var(--text3);font-size:11px">(' + pct10 + '%)</span></td>' +
+      '<td style="text-align:center;color:' + col + ';font-weight:900">' + (diff >= 0 ? '+' : '') + diff.toFixed(1) + '</td></tr>';
+  });
+
+  return '<div class="card" style="margin-top:20px">' +
+    '<div class="card-head"><h2>&#127881; Radar &mdash; Voc\u00ea vs Top 10</h2></div>' +
+    '<p class="card-sub">Azul = voc\u00ea &middot; Dourado = m\u00e9dia dos 10 primeiros colocados &middot; Valores normalizados pelo m\u00e1ximo de cada disciplina</p>' +
+    '<div style="max-width:480px;margin:0 auto">' + svgRadar + '</div>' +
+    radarLegend +
+    '<table class="dtable" style="margin-top:16px"><thead><tr><th>Disciplina</th><th>Voc\u00ea</th><th>Top 10 (m\u00e9dia)</th><th>Diferen\u00e7a</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+    '</div>';
 }
 
 // Tab 3: Chance
@@ -1451,6 +1570,271 @@ function buscar() { showSug(); }
 document.getElementById('raModal').addEventListener('click', function(e) {
   if (e.target === this) fecharRAModal();
 });
+
+// ============================================================
+// EVOLUÇÃO — linha do tempo S1 → S2
+// ============================================================
+function buildEvolucao(a) {
+  const inS1 = RAW_S1.find(x => x.ra === a.ra);
+  const inS2 = RAW_S2.find(x => x.ra === a.ra);
+
+  if (!inS1 || !inS2) {
+    const which = !inS1 ? 'Simulado 1 (25/02)' : 'Simulado 2 (04/03)';
+    document.getElementById('pEvolucao').innerHTML =
+      '<div class="card" style="margin-top:20px">' +
+      '<div class="card-head"><h2>&#128200; Evolu\u00e7\u00e3o entre Simulados</h2></div>' +
+      '<div class="warn-box"><h5>&#9888;&#65039; Dados incompletos</h5>' +
+      '<p style="font-size:13px;color:var(--text2)">Nenhum registro encontrado no ' + which + '. Participe de ambos os simulados para ver sua evolu\u00e7\u00e3o.</p></div></div>';
+    return;
+  }
+
+  const DISC_COLORS = ['#1e3a5f','#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#db2877','#0891b2','#65a30d'];
+  const tot1 = inS1.tot, tot2 = inS2.tot;
+  const totDelta = tot2 - tot1;
+  const totCol = totDelta > 0 ? '#16a34a' : totDelta < 0 ? '#dc2626' : '#6b7280';
+  const rankDelta = inS1.rank - inS2.rank;
+  const rankCol = rankDelta > 0 ? '#16a34a' : rankDelta < 0 ? '#dc2626' : '#6b7280';
+
+  // ---- Média da turma S1 e S2 (total) ----
+  const avgTot1 = RAW_S1.reduce((s,x) => s + x.tot, 0) / RAW_S1.length;
+  const avgTot2 = RAW_S2.reduce((s,x) => s + x.tot, 0) / RAW_S2.length;
+  const sortedS1 = [...RAW_S1].sort((a,b) => b.tot - a.tot);
+  const sortedS2 = [...RAW_S2].sort((a,b) => b.tot - a.tot);
+  const top10S1avg = sortedS1.slice(0,10).reduce((s,x) => s + x.tot, 0) / 10;
+  const top10S2avg = sortedS2.slice(0,10).reduce((s,x) => s + x.tot, 0) / 10;
+
+  // ---- Média por disciplina S1 e S2 ----
+  const avgDiscS1 = {}, avgDiscS2 = {};
+  DISC_INFO.forEach(d => {
+    avgDiscS1[d.key] = RAW_S1.reduce((s,x) => s + x[d.key], 0) / RAW_S1.length;
+    avgDiscS2[d.key] = RAW_S2.reduce((s,x) => s + x[d.key], 0) / RAW_S2.length;
+  });
+
+  // ===========================================================
+  // GRÁFICO 1 — Evolução da Média Total (3 linhas)
+  // ===========================================================
+  function makeTotalEvolutionSVG() {
+    const W = 640, H = 320, padL = 52, padR = 24, padT = 54, padB = 50;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+    const xS1 = padL + chartW * 0.2;
+    const xS2 = padL + chartW * 0.8;
+    const maxY = 60;
+    const yFor = v => padT + chartH - (v / maxY * chartH);
+
+    let grid = '';
+    [0, 15, 30, 43, 45, 60].forEach(v => {
+      const y = yFor(v);
+      const isAprov = v === 43;
+      grid += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W-padR) + '" y2="' + y.toFixed(1) +
+        '" stroke="' + (isAprov ? '#fbbf24' : '#e5e9f0') + '" stroke-width="' + (isAprov ? '1.5' : '1') +
+        '"' + (isAprov ? ' stroke-dasharray="5,3"' : '') + '/>';
+      grid += '<text x="' + (padL-6) + '" y="' + (y+4).toFixed(1) + '" text-anchor="end" font-size="10" fill="' + (isAprov ? '#d97706' : '#8b99ab') + '" font-weight="' + (isAprov ? '700' : '400') + '">' + v + (isAprov ? ' ✓' : '') + '</text>';
+    });
+    grid += '<text x="' + (W-padR+4) + '" y="' + (yFor(43)+4).toFixed(1) + '" font-size="9" fill="#d97706" font-weight="700">m\u00ednimo</text>';
+
+    const axes =
+      '<line x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (padT+chartH) + '" stroke="#94a3b8" stroke-width="1.5"/>' +
+      '<line x1="' + padL + '" y1="' + (padT+chartH) + '" x2="' + (W-padR) + '" y2="' + (padT+chartH) + '" stroke="#94a3b8" stroke-width="1.5"/>' +
+      '<line x1="' + xS1.toFixed(1) + '" y1="' + padT + '" x2="' + xS1.toFixed(1) + '" y2="' + (padT+chartH) + '" stroke="#d1d9e6" stroke-width="1" stroke-dasharray="3,3"/>' +
+      '<line x1="' + xS2.toFixed(1) + '" y1="' + padT + '" x2="' + xS2.toFixed(1) + '" y2="' + (padT+chartH) + '" stroke="#d1d9e6" stroke-width="1" stroke-dasharray="3,3"/>' +
+      '<text x="' + xS1.toFixed(1) + '" y="' + (padT+chartH+18) + '" text-anchor="middle" font-size="13" font-weight="800" fill="#1e3a5f">Simulado 1</text>' +
+      '<text x="' + xS1.toFixed(1) + '" y="' + (padT+chartH+32) + '" text-anchor="middle" font-size="10" fill="#8b99ab">25/02/2026</text>' +
+      '<text x="' + xS2.toFixed(1) + '" y="' + (padT+chartH+18) + '" text-anchor="middle" font-size="13" font-weight="800" fill="#1e3a5f">Simulado 2</text>' +
+      '<text x="' + xS2.toFixed(1) + '" y="' + (padT+chartH+32) + '" text-anchor="middle" font-size="10" fill="#8b99ab">04/03/2026</text>';
+
+    function seriesLine(v1, v2, col, w, dash, dotR) {
+      const y1 = yFor(v1), y2 = yFor(v2);
+      const da = dash ? ' stroke-dasharray="5,3"' : '';
+      return '<line x1="' + xS1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + xS2.toFixed(1) + '" y2="' + y2.toFixed(1) +
+        '" stroke="' + col + '" stroke-width="' + w + '"' + da + '/>' +
+        '<circle cx="' + xS1.toFixed(1) + '" cy="' + y1.toFixed(1) + '" r="' + dotR + '" fill="' + col + '" stroke="white" stroke-width="2"/>' +
+        '<circle cx="' + xS2.toFixed(1) + '" cy="' + y2.toFixed(1) + '" r="' + dotR + '" fill="' + col + '" stroke="white" stroke-width="2"/>' +
+        '<text x="' + (xS1-12) + '" y="' + (y1+4).toFixed(1) + '" text-anchor="end" font-size="12" font-weight="900" fill="' + col + '">' + Math.round(v1) + '</text>' +
+        '<text x="' + (xS2+12) + '" y="' + (y2+4).toFixed(1) + '" text-anchor="start" font-size="12" font-weight="900" fill="' + col + '">' + Math.round(v2) + '</text>';
+    }
+
+    const chartTitle = '<text x="' + (W/2) + '" y="20" text-anchor="middle" font-size="13" font-weight="900" fill="#1e3a5f">Evolu\u00e7\u00e3o do Total de Acertos (de 60)</text>';
+    const body =
+      seriesLine(top10S1avg, top10S2avg, '#fbbf24', 2.5, true, 5) +
+      seriesLine(avgTot1, avgTot2, '#3b82f6', 2.5, true, 5) +
+      seriesLine(tot1, tot2, '#1e3a5f', 3.5, false, 7);
+
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:320px">' +
+      chartTitle + grid + axes + body + '</svg>';
+  }
+
+  // ===========================================================
+  // GRÁFICO 2 — Evolução por Disciplina (9 linhas)
+  // ===========================================================
+  function makeDiscEvolutionSVG() {
+    const W = 700, H = 320, padL = 52, padR = 24, padT = 54, padB = 50;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+    const xS1 = padL + chartW * 0.18;
+    const xS2 = padL + chartW * 0.82;
+    const yFor = pct => padT + chartH - (pct / 100 * chartH);
+
+    let grid = '';
+    [0, 25, 50, 75, 100].forEach(v => {
+      const y = yFor(v);
+      grid += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W-padR) + '" y2="' + y.toFixed(1) + '" stroke="#e5e9f0" stroke-width="1"/>';
+      grid += '<text x="' + (padL-6) + '" y="' + (y+4).toFixed(1) + '" text-anchor="end" font-size="10" fill="#8b99ab">' + v + '%</text>';
+    });
+
+    const axes =
+      '<line x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (padT+chartH) + '" stroke="#94a3b8" stroke-width="1.5"/>' +
+      '<line x1="' + padL + '" y1="' + (padT+chartH) + '" x2="' + (W-padR) + '" y2="' + (padT+chartH) + '" stroke="#94a3b8" stroke-width="1.5"/>' +
+      '<line x1="' + xS1.toFixed(1) + '" y1="' + padT + '" x2="' + xS1.toFixed(1) + '" y2="' + (padT+chartH) + '" stroke="#d1d9e6" stroke-width="1" stroke-dasharray="3,3"/>' +
+      '<line x1="' + xS2.toFixed(1) + '" y1="' + padT + '" x2="' + xS2.toFixed(1) + '" y2="' + (padT+chartH) + '" stroke="#d1d9e6" stroke-width="1" stroke-dasharray="3,3"/>' +
+      '<text x="' + xS1.toFixed(1) + '" y="' + (padT+chartH+18) + '" text-anchor="middle" font-size="13" font-weight="800" fill="#1e3a5f">Simulado 1</text>' +
+      '<text x="' + xS1.toFixed(1) + '" y="' + (padT+chartH+32) + '" text-anchor="middle" font-size="10" fill="#8b99ab">25/02/2026</text>' +
+      '<text x="' + xS2.toFixed(1) + '" y="' + (padT+chartH+18) + '" text-anchor="middle" font-size="13" font-weight="800" fill="#1e3a5f">Simulado 2</text>' +
+      '<text x="' + xS2.toFixed(1) + '" y="' + (padT+chartH+32) + '" text-anchor="middle" font-size="10" fill="#8b99ab">04/03/2026</text>';
+
+    let lines = '', dotLayer = '';
+    DISC_INFO.forEach((d, i) => {
+      const v1 = Math.round(inS1[d.key] / d.max * 100);
+      const v2 = Math.round(inS2[d.key] / d.max * 100);
+      const y1 = yFor(v1), y2 = yFor(v2);
+      const col = DISC_COLORS[i];
+      const da = v2 < v1 ? ' stroke-dasharray="5,3"' : '';
+      lines += '<line x1="' + xS1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + xS2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + col + '" stroke-width="2"' + da + ' opacity="0.9"/>';
+      dotLayer += '<circle cx="' + xS1.toFixed(1) + '" cy="' + y1.toFixed(1) + '" r="5" fill="' + col + '" stroke="white" stroke-width="1.5"/>';
+      dotLayer += '<circle cx="' + xS2.toFixed(1) + '" cy="' + y2.toFixed(1) + '" r="5" fill="' + col + '" stroke="white" stroke-width="1.5"/>';
+      dotLayer += '<text x="' + (xS1-9) + '" y="' + (y1+4).toFixed(1) + '" text-anchor="end" font-size="9" fill="' + col + '" font-weight="700">' + v1 + '%</text>';
+      dotLayer += '<text x="' + (xS2+9) + '" y="' + (y2+4).toFixed(1) + '" text-anchor="start" font-size="9" fill="' + col + '" font-weight="700">' + v2 + '%</text>';
+    });
+
+    const chartTitle = '<text x="' + (W/2) + '" y="20" text-anchor="middle" font-size="13" font-weight="900" fill="#1e3a5f">Evolu\u00e7\u00e3o por Disciplina (% do m\u00e1ximo de cada)</text>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:320px">' +
+      chartTitle + grid + axes + lines + dotLayer + '</svg>';
+  }
+
+  // ---- Discipline chips with delta ----
+  let chips = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin:14px 0">';
+  DISC_INFO.forEach((d, i) => {
+    const v1 = inS1[d.key], v2 = inS2[d.key];
+    const delta = v2 - v1;
+    const col = DISC_COLORS[i];
+    const arrow = delta > 0 ? '\u25b2' : delta < 0 ? '\u25bc' : '\u2014';
+    const arrowCol = delta > 0 ? '#16a34a' : delta < 0 ? '#dc2626' : '#6b7280';
+    chips += '<div style="background:' + col + '12;border:1.5px solid ' + col + '40;border-radius:8px;padding:7px 11px;display:flex;align-items:center;gap:7px">' +
+      '<div style="width:9px;height:9px;border-radius:50%;background:' + col + ';flex-shrink:0"></div>' +
+      '<span style="font-size:12px;font-weight:700;color:#1a2332">' + d.label + '</span>' +
+      '<span style="font-size:12px;font-weight:900;color:' + arrowCol + '">' + arrow + ' ' + (delta > 0 ? '+' : '') + delta + '</span></div>';
+  });
+  chips += '</div>';
+
+  // ---- Table ----
+  let trows = '';
+  DISC_INFO.forEach(d => {
+    const v1 = inS1[d.key], v2 = inS2[d.key];
+    const avg1 = avgDiscS1[d.key], avg2 = avgDiscS2[d.key];
+    const delta = v2 - v1;
+    const col = delta > 0 ? '#16a34a' : delta < 0 ? '#dc2626' : '#6b7280';
+    const arrow = delta > 0 ? '\u25b2' : delta < 0 ? '\u25bc' : '\u2014';
+    const vsAvg1 = (v1 - avg1).toFixed(1);
+    const vsAvg2 = (v2 - avg2).toFixed(1);
+    trows += '<tr><td><strong>' + d.label + '</strong></td>' +
+      '<td style="text-align:center">' + v1 + '/' + d.max + '<br><span style="font-size:10px;color:' + (parseFloat(vsAvg1)>=0?'#16a34a':'#dc2626') + ';font-weight:700">' + (parseFloat(vsAvg1)>=0?'+':'') + vsAvg1 + ' vs m\u00e9dia</span></td>' +
+      '<td style="text-align:center">' + v2 + '/' + d.max + '<br><span style="font-size:10px;color:' + (parseFloat(vsAvg2)>=0?'#16a34a':'#dc2626') + ';font-weight:700">' + (parseFloat(vsAvg2)>=0?'+':'') + vsAvg2 + ' vs m\u00e9dia</span></td>' +
+      '<td style="text-align:center;color:' + col + ';font-weight:900">' + arrow + ' ' + (delta > 0 ? '+' : '') + delta + '</td>' +
+      '<td style="text-align:center"><div style="height:8px;background:#e5e9f0;border-radius:4px;overflow:hidden;width:60px;margin:0 auto">' +
+        '<div style="width:' + Math.round(v2/d.max*100) + '%;height:100%;background:' + col + ';border-radius:4px"></div></div></td></tr>';
+  });
+
+  const improved  = DISC_INFO.filter(d => inS2[d.key] > inS1[d.key]).length;
+  const regressed = DISC_INFO.filter(d => inS2[d.key] < inS1[d.key]).length;
+  const stable    = DISC_INFO.length - improved - regressed;
+
+  const avgTotDelta = avgTot2 - avgTot1;
+  const avgTotCol = avgTotDelta > 0 ? '#16a34a' : avgTotDelta < 0 ? '#dc2626' : '#6b7280';
+
+  document.getElementById('pEvolucao').innerHTML =
+    '<div style="margin-top:20px">' +
+
+    // ---- Stats row ----
+    '<div class="stat-grid">' +
+      '<div class="stat-item"><div class="s-label">Total S1</div><div class="s-val">' + tot1 + '</div><div class="s-hint">25/02/2026</div></div>' +
+      '<div class="stat-item"><div class="s-label">Total S2</div><div class="s-val">' + tot2 + '</div><div class="s-hint">04/03/2026</div></div>' +
+      '<div class="stat-item"><div class="s-label">Varia\u00e7\u00e3o</div><div class="s-val" style="color:' + totCol + '">' + (totDelta >= 0 ? '+' : '') + totDelta + '</div><div class="s-hint">acertos</div></div>' +
+      '<div class="stat-item"><div class="s-label">Ranking S1</div><div class="s-val">' + inS1.rank + '\u00ba</div><div class="s-hint">posi\u00e7\u00e3o</div></div>' +
+      '<div class="stat-item"><div class="s-label">Ranking S2</div><div class="s-val">' + inS2.rank + '\u00ba</div><div class="s-hint">posi\u00e7\u00e3o</div></div>' +
+      '<div class="stat-item"><div class="s-label">Ranking</div><div class="s-val" style="color:' + rankCol + '">' + (rankDelta > 0 ? '\u25b2 +' : rankDelta < 0 ? '\u25bc ' : '\u2014 ') + Math.abs(rankDelta) + '</div><div class="s-hint">posi\u00e7\u00f5es</div></div>' +
+    '</div>' +
+
+    // ---- Card 1: Evolução da Média Total ----
+    '<div class="card">' +
+      '<div class="card-head"><h2>&#128200; Evolu\u00e7\u00e3o da M\u00e9dia Total</h2></div>' +
+      '<p class="card-sub">Comparativo entre sua pontua\u00e7\u00e3o total, a m\u00e9dia da turma e a m\u00e9dia do Top 10 nos dois simulados</p>' +
+      makeTotalEvolutionSVG() +
+      // Legend
+      '<div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:12px">' +
+        '<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:4px;background:#1e3a5f;border-radius:2px"></div><span style="font-size:12px;font-weight:700;color:#1a2332">' + a.nome.split(' ')[0] + ' (voc\u00ea)</span></div>' +
+        '<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:3px;background:#3b82f6;border-radius:2px;border-top:2px dashed #3b82f6"></div><span style="font-size:12px;font-weight:700;color:#1a2332">M\u00e9dia da turma</span></div>' +
+        '<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:3px;background:#fbbf24;border-radius:2px;border-top:2px dashed #fbbf24"></div><span style="font-size:12px;font-weight:700;color:#1a2332">M\u00e9dia Top 10</span></div>' +
+      '</div>' +
+      // Summary comparison
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px">' +
+        '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">M\u00e9dia Turma</div>' +
+          '<div style="display:flex;justify-content:space-between;align-items:baseline">' +
+            '<span style="font-size:13px;font-weight:700;color:var(--text2)">S1: <strong>' + avgTot1.toFixed(1) + '</strong></span>' +
+            '<span style="font-size:13px;font-weight:700;color:var(--text2)">S2: <strong>' + avgTot2.toFixed(1) + '</strong></span>' +
+            '<span style="font-size:13px;font-weight:900;color:' + avgTotCol + '">' + (avgTotDelta >= 0 ? '+' : '') + avgTotDelta.toFixed(1) + '</span>' +
+          '</div></div>' +
+        '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Top 10 (m\u00e9dia)</div>' +
+          '<div style="display:flex;justify-content:space-between;align-items:baseline">' +
+            '<span style="font-size:13px;font-weight:700;color:var(--text2)">S1: <strong>' + top10S1avg.toFixed(1) + '</strong></span>' +
+            '<span style="font-size:13px;font-weight:700;color:var(--text2)">S2: <strong>' + top10S2avg.toFixed(1) + '</strong></span>' +
+            '<span style="font-size:13px;font-weight:900;color:' + (top10S2avg - top10S1avg >= 0 ? '#16a34a' : '#dc2626') + '">' + (top10S2avg - top10S1avg >= 0 ? '+' : '') + (top10S2avg - top10S1avg).toFixed(1) + '</span>' +
+          '</div></div>' +
+        '<div style="background:' + (totDelta >= 0 ? '#f0fdf4' : '#fef2f2') + ';border:1px solid ' + (totDelta >= 0 ? '#86efac' : '#fca5a5') + ';border-radius:10px;padding:14px">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Sua Vantagem vs M\u00e9dia</div>' +
+          '<div style="display:flex;justify-content:space-between;align-items:baseline">' +
+            '<span style="font-size:12px;font-weight:700;color:var(--text2)">S1: <strong style="color:' + (tot1 - avgTot1 >= 0 ? '#16a34a' : '#dc2626') + '">' + (tot1 - avgTot1 >= 0 ? '+' : '') + (tot1 - avgTot1).toFixed(1) + '</strong></span>' +
+            '<span style="font-size:12px;font-weight:700;color:var(--text2)">S2: <strong style="color:' + (tot2 - avgTot2 >= 0 ? '#16a34a' : '#dc2626') + '">' + (tot2 - avgTot2 >= 0 ? '+' : '') + (tot2 - avgTot2).toFixed(1) + '</strong></span>' +
+          '</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    // ---- Card 2: Evolução por Disciplina ----
+    '<div class="card">' +
+      '<div class="card-head"><h2>&#128202; Evolu\u00e7\u00e3o por Disciplina</h2></div>' +
+      '<p class="card-sub">Linha s\u00f3lida = melhora &middot; Linha tracejada = queda &middot; Valores normalizados pelo m\u00e1ximo de cada disciplina</p>' +
+      makeDiscEvolutionSVG() +
+      chips +
+    '</div>' +
+
+    // ---- Card 3: Tabela comparativa ----
+    '<div class="card">' +
+      '<div class="card-head"><h2>&#128203; Comparativo Detalhado</h2></div>' +
+      '<table class="dtable">' +
+        '<thead><tr><th>Disciplina</th><th>S1 (25/02)</th><th>S2 (04/03)</th><th>Varia\u00e7\u00e3o</th><th>S2 Bar</th></tr></thead>' +
+        '<tbody>' + trows + '</tbody>' +
+        '<tfoot><tr>' +
+          '<td style="font-weight:900">TOTAL</td>' +
+          '<td style="text-align:center;font-weight:900">' + tot1 + '/60<br><span style="font-size:10px;color:' + (tot1-avgTot1>=0?'#16a34a':'#dc2626') + ';font-weight:700">' + (tot1-avgTot1>=0?'+':'') + (tot1-avgTot1).toFixed(1) + ' vs m\u00e9dia</span></td>' +
+          '<td style="text-align:center;font-weight:900">' + tot2 + '/60<br><span style="font-size:10px;color:' + (tot2-avgTot2>=0?'#16a34a':'#dc2626') + ';font-weight:700">' + (tot2-avgTot2>=0?'+':'') + (tot2-avgTot2).toFixed(1) + ' vs m\u00e9dia</span></td>' +
+          '<td style="text-align:center;font-weight:900;color:' + totCol + '">' + (totDelta > 0 ? '\u25b2 +' : totDelta < 0 ? '\u25bc ' : '\u2014 ') + Math.abs(totDelta) + '</td>' +
+          '<td style="text-align:center"><div style="height:8px;background:#e5e9f0;border-radius:4px;overflow:hidden;width:60px;margin:0 auto"><div style="width:' + Math.round(tot2/60*100) + '%;height:100%;background:' + totCol + ';border-radius:4px"></div></div></td>' +
+        '</tr></tfoot>' +
+      '</table>' +
+      '<div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">' +
+        '<div style="flex:1;min-width:110px;text-align:center;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px">' +
+          '<div style="font-size:32px;font-weight:900;color:#16a34a">' + improved + '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.5px">\u25b2 Melhoraram</div></div>' +
+        '<div style="flex:1;min-width:110px;text-align:center;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:14px">' +
+          '<div style="font-size:32px;font-weight:900;color:#dc2626">' + regressed + '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:.5px">\u25bc Regrediram</div></div>' +
+        '<div style="flex:1;min-width:110px;text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px">' +
+          '<div style="font-size:32px;font-weight:900;color:var(--text3)">' + stable + '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">\u2014 Est\u00e1veis</div></div>' +
+      '</div>' +
+    '</div></div>';
+}
 </script>
 </body>
 </html>
