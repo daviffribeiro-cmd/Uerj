@@ -363,6 +363,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
       <button class="tab-btn" onclick="goTab('pEstudos',this)">&#128218; Plano de Estudos</button>
       <button class="tab-btn" onclick="goTab('pEvolucao',this)">&#128200; Evolu&#231;&#227;o</button>
       <button class="tab-btn" onclick="goTab('pClassif',this)">&#127941; Classifica&#231;&#245;es</button>
+      <button class="tab-btn" onclick="goTab('pRelatorio',this)">&#128203; Relat&#243;rio</button>
     </div>
   </div>
   <div class="page-wrap">
@@ -373,6 +374,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
     <div id="pEstudos" class="tab-pane"></div>
     <div id="pEvolucao" class="tab-pane"></div>
     <div id="pClassif" class="tab-pane"></div>
+    <div id="pRelatorio" class="tab-pane"></div>
   </div>
 </div>
 
@@ -1193,6 +1195,7 @@ function openDashboard(a, data, examId) {
   buildPlano(a, avgs);
   buildEvolucao(a);
   buildClassificacoes(a);
+  buildRelatorio(a, avgs, pos, N, examId);
   window.scrollTo(0,0);
 }
 
@@ -2081,6 +2084,144 @@ function buildEvolucao(a) {
 
 // ============================================================
 // CLASSIFICAÇÕES — posição nos dois simulados
+// ============================================================
+function buildRelatorio(a, avgs, pos, N, examId) {
+  const firstName = a.nome.split(' ')[0];
+  const simLabel = examId === 1 ? '1º Simulado (25/02/2026)' : '2º Simulado (04/03/2026)';
+  const prev = examId === 2 ? RAW_S1.find(x => x.ra === a.ra) : null;
+
+  const icB = function(pt) {
+    if (pt >= 70) return '<span style="background:#d1fae5;color:#065f46;border:1.5px solid #6ee7b7;padding:3px 9px;border-radius:8px;font-weight:800;font-size:12px">🟢 Sólido</span>';
+    if (pt >= 50) return '<span style="background:#fef9c3;color:#713f12;border:1.5px solid #fde047;padding:3px 9px;border-radius:8px;font-weight:800;font-size:12px">🟡 Razoável</span>';
+    return '<span style="background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;padding:3px 9px;border-radius:8px;font-weight:800;font-size:12px">🔴 Intervenção</span>';
+  };
+  const icLabel = function(pt) { return pt >= 70 ? '🟢 Sólido' : pt >= 50 ? '🟡 Razoável' : '🔴 Requer Intervenção'; };
+
+  const pTotal = a.tot / 60 * 100;
+  const icGeral = icLabel(pTotal);
+  const avgTot = +(DISC_INFO.reduce(function(s,d){return s+avgs[d.key];},0)).toFixed(1);
+  const concDesc = {A:'Conceito A — desempenho excelente',B:'Conceito B — bom desempenho',C:'Conceito C — desempenho regular',D:'Conceito D — desempenho abaixo do esperado',E:'Conceito E — desempenho insuficiente'};
+  const concFrase = concDesc[a.conc] || ('Conceito ' + a.conc);
+  const bom = a.conc === 'A' || a.conc === 'B';
+  const sBg = bom ? '#d1fae5' : '#fee2e2';
+  const sBrd = bom ? '#6ee7b7' : '#fca5a5';
+  const sClr = bom ? '#065f46' : '#991b1b';
+
+  // ── RESULTADO ──
+  const posText = pos === 1 ? 'em <strong>1º lugar</strong>' : pos <= 3 ? 'em <strong>' + pos + 'º lugar</strong> (top 3)' : 'em <strong>' + pos + 'º lugar</strong>';
+  const vsTurma = a.tot > +avgTot
+    ? '<strong style="color:#10b981">acima da média da turma</strong> (média: ' + avgTot + ' pontos)'
+    : a.tot < +avgTot
+    ? '<strong style="color:#ef4444">abaixo da média da turma</strong> (média: ' + avgTot + ' pontos)'
+    : '<strong>na média da turma</strong> (' + avgTot + ' pontos)';
+  const resultadoTexto = 'No <strong>' + simLabel + '</strong>, <strong>' + firstName + '</strong> ficou ' + posText + ' entre <strong>' + N + ' alunos</strong>, totalizando <strong>' + a.tot + ' de 60 pontos</strong> — ' + vsTurma + '. O desempenho geral foi <strong>' + icGeral + '</strong> com ' + pTotal.toFixed(1) + '% de aproveitamento. Obteve <strong>' + concFrase + '</strong>.';
+
+  // ── EVOLUÇÃO ──
+  var evoTexto;
+  if (!prev) {
+    evoTexto = '<p style="font-size:14px;color:var(--t3);font-style:italic">Este foi o primeiro simulado realizado — não há comparação anterior disponível.</p>';
+  } else {
+    var rd = prev.rank - a.rank;
+    var td = a.tot - prev.tot;
+    var rankFrase = rd > 0
+      ? '<strong style="color:#10b981">subiu ' + rd + ' ' + (rd===1?'posição':'posições') + '</strong> no ranking (' + prev.rank + 'º → ' + a.rank + 'º)'
+      : rd < 0
+      ? '<strong style="color:#ef4444">caiu ' + Math.abs(rd) + ' ' + (Math.abs(rd)===1?'posição':'posições') + '</strong> no ranking (' + prev.rank + 'º → ' + a.rank + 'º)'
+      : '<strong style="color:#9ca3af">manteve a mesma posição</strong> (' + a.rank + 'º)';
+    var totalFrase = td > 0
+      ? 'marcou <strong style="color:#10b981">' + td + ' ' + (td===1?'ponto':'pontos') + ' a mais</strong> (' + prev.tot + ' → ' + a.tot + ')'
+      : td < 0
+      ? 'marcou <strong style="color:#ef4444">' + Math.abs(td) + ' ' + (Math.abs(td)===1?'ponto':'pontos') + ' a menos</strong> (' + prev.tot + ' → ' + a.tot + ')'
+      : 'manteve a mesma pontuação (' + a.tot + ')';
+    var discLines = DISC_INFO.map(function(d) {
+      var pv = prev[d.key], cv = a[d.key], dv = cv - pv;
+      var arr = dv > 0 ? '<span style="color:#10b981">↑ +' + dv + '</span>' : dv < 0 ? '<span style="color:#ef4444">↓ ' + dv + '</span>' : '<span style="color:#9ca3af">= igual</span>';
+      return '<li style="margin-bottom:6px"><strong>' + d.label + ':</strong> ' + pv + '/' + d.max + ' → <strong>' + cv + '/' + d.max + '</strong> &nbsp;' + arr + '</li>';
+    }).join('');
+    evoTexto = '<p style="font-size:15px;line-height:1.9;color:var(--t1)">' + firstName + ' ' + rankFrase + ' e ' + totalFrase + '.</p>' +
+      '<ul style="list-style:none;padding:8px 0 0 0;margin:0;font-size:14px;color:var(--t2);line-height:1.8">' + discLines + '</ul>';
+  }
+
+  // ── PONTOS DE ATENÇÃO ──
+  var subjs = DISC_INFO.map(function(d) {
+    var v = a[d.key], av = avgs[d.key], pt = v / d.max * 100;
+    return {label:d.label, v:v, avg:av, max:d.max, min:d.min, pct:pt, abxMin:v < d.min};
+  });
+  var urgentes = subjs.filter(function(d){return d.abxMin;});
+  var abxMed   = subjs.filter(function(d){return !d.abxMin && d.v < d.avg;});
+  var fortes   = subjs.filter(function(d){return !d.abxMin && d.v >= d.avg;});
+  var atencaoTexto;
+  if (!urgentes.length && !abxMed.length) {
+    atencaoTexto = '<p style="font-size:15px;line-height:1.9;color:#065f46">🎉 <strong>' + firstName + '</strong> está acima do mínimo em todas as disciplinas e acima da média da turma! Excelente desempenho — continue assim.</p>';
+  } else {
+    var urgLines = urgentes.map(function(d) {
+      var f = d.min - d.v;
+      return '<li style="margin-bottom:10px">🔴 <strong>' + d.label + '</strong>: acertou ' + d.v + '/' + d.max + ' — abaixo do mínimo de ' + d.min + '. Faltam <strong>' + f + ' ' + (f===1?'ponto':'pontos') + '</strong> para atingir o critério. <strong>Atenção prioritária</strong> nesta disciplina.</li>';
+    }).join('');
+    var medLines = abxMed.map(function(d) {
+      var diff = (d.avg - d.v).toFixed(1);
+      return '<li style="margin-bottom:10px">🟡 <strong>' + d.label + '</strong>: ' + d.v + '/' + d.max + ' — dentro do mínimo, mas <strong>' + diff + ' abaixo da média da turma</strong> (' + d.avg.toFixed(1) + '). Há espaço para melhoria.</li>';
+    }).join('');
+    var okLines = fortes.map(function(d) {
+      var diff = (d.v - d.avg).toFixed(1);
+      return '<li style="margin-bottom:6px">🟢 <strong>' + d.label + '</strong>: ' + d.v + '/' + d.max + ' — acima do mínimo e <strong>+' + diff + ' acima da média</strong>. Ponto forte!</li>';
+    }).join('');
+    atencaoTexto = '<ul style="list-style:none;padding:0;margin:0;font-size:14px;color:var(--t1);line-height:1.7">' + urgLines + medLines + okLines + '</ul>';
+  }
+
+  // ── DIAGNÓSTICO ──
+  var diagItems = subjs.map(function(d) {
+    var diff = d.v - d.avg;
+    return '<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);font-size:13px">' +
+      '<div style="flex:1;font-weight:800">' + d.label + ' <span style="font-size:10px;color:#9ca3af;font-weight:500">mín.' + d.min + '</span></div>' +
+      '<div style="color:var(--t2)">' + d.v + '/' + d.max + ' &nbsp;<span style="font-size:11px">(' + d.pct.toFixed(0) + '%)</span></div>' +
+      '<div>' + icB(d.pct) + '</div>' +
+      '<div style="font-size:12px;min-width:80px;text-align:right">' + (diff>=0?'<span style="color:#10b981">+'+diff.toFixed(1)+'</span>':'<span style="color:#ef4444">'+diff.toFixed(1)+'</span>') + ' vs turma</div>' +
+    '</div>';
+  }).join('');
+  var totDiff = a.tot - +avgTot;
+  var totalDiag = '<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:13px;font-weight:900;background:linear-gradient(135deg,#ede9fe,#ddd6fe)">' +
+    '<div style="flex:1">⬛ TOTAL</div>' +
+    '<div style="color:var(--t2)">' + a.tot + '/60 &nbsp;<span style="font-size:11px">(' + pTotal.toFixed(0) + '%)</span></div>' +
+    '<div>' + icB(pTotal) + '</div>' +
+    '<div style="font-size:12px;min-width:80px;text-align:right">' + (totDiff>=0?'<span style="color:#10b981">+'+totDiff.toFixed(1)+'</span>':'<span style="color:#ef4444">'+totDiff.toFixed(1)+'</span>') + ' vs turma</div>' +
+  '</div>';
+
+  // ── RECOMENDAÇÃO ──
+  var piorDisc = urgentes.length ? urgentes.slice().sort(function(x,y){return x.pct-y.pct;})[0]
+    : abxMed.length ? abxMed.slice().sort(function(x,y){return x.pct-y.pct;})[0]
+    : subjs.slice().sort(function(x,y){return x.pct-y.pct;})[0];
+  var recFrase = urgentes.length
+    ? 'Concentre os estudos em <strong>' + urgentes.map(function(d){return d.label;}).join(' e ') + '</strong> — atingir o mínimo nessa' + (urgentes.length>1?'s disciplinas':' disciplina') + ' é decisivo para avançar no ranking da UERJ.'
+    : abxMed.length
+    ? '<strong>' + piorDisc.label + '</strong> é o maior ponto de melhoria (' + piorDisc.pct.toFixed(0) + '% de aproveitamento). Dedicar tempo extra a esta matéria pode fazer diferença real na classificação.'
+    : 'O desempenho está sólido em todas as disciplinas. Manter a regularidade de estudos é a chave para ampliar ainda mais esta boa classificação.';
+
+  document.getElementById('pRelatorio').innerHTML =
+    '<div style="background:' + sBg + ';border:2px solid ' + sBrd + ';border-radius:14px;padding:18px 22px;margin:20px 0 18px;display:flex;align-items:center;gap:16px">' +
+      '<div style="font-size:38px;flex-shrink:0">' + (bom?'✅':'⚠️') + '</div>' +
+      '<div>' +
+        '<div style="font-size:18px;font-weight:900;color:' + sClr + '">' + concFrase + ' — ' + simLabel + '</div>' +
+        '<div style="font-size:13px;color:var(--t2);margin-top:3px">#' + pos + 'º de ' + N + ' · ' + a.tot + '/60 pontos · ' + pTotal.toFixed(1) + '% · ' + icGeral + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="card"><div class="card-head"><h2>🏆 Resultado</h2></div>' +
+    '<p class="card-sub">Como foi o desempenho neste simulado</p>' +
+    '<p style="font-size:15px;line-height:1.9;color:var(--t1);margin-top:8px">' + resultadoTexto + '</p></div>' +
+    '<div class="card"><div class="card-head"><h2>📈 Evolução</h2></div>' +
+    '<p class="card-sub">O que mudou em relação ao simulado anterior</p>' +
+    '<div style="margin-top:8px">' + evoTexto + '</div></div>' +
+    '<div class="card"><div class="card-head"><h2>⚠️ Pontos de Atenção</h2></div>' +
+    '<p class="card-sub">🔴 abaixo do mínimo · 🟡 abaixo da média · 🟢 ponto forte</p>' +
+    '<div style="margin-top:12px">' + atencaoTexto + '</div></div>' +
+    '<div class="card"><div class="card-head"><h2>📊 Diagnóstico por Disciplina</h2></div>' +
+    '<p class="card-sub">IC: 🟢 Sólido ≥70% · 🟡 Razoável 50–69% · 🔴 &lt;50% Intervenção necessária</p>' +
+    '<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:12px">' + diagItems + totalDiag + '</div></div>' +
+    '<div class="card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#6ee7b7">' +
+    '<div class="card-head"><h2>💡 Recomendação</h2></div>' +
+    '<p style="font-size:14px;line-height:1.9;color:var(--t1);margin-top:8px">' + recFrase + '</p></div>';
+}
+
 // ============================================================
 function buildClassificacoes(a) {
   const s1 = RAW_S1.find(x => x.ra === a.ra);
