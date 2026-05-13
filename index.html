@@ -362,6 +362,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
       <button class="tab-btn" onclick="goTab('pAnalise',this)">&#128203; An&aacute;lise</button>
       <button class="tab-btn" onclick="goTab('pEstudos',this)">&#128218; Plano de Estudos</button>
       <button class="tab-btn" onclick="goTab('pEvolucao',this)">&#128200; Evolu&#231;&#227;o</button>
+      <button class="tab-btn" onclick="goTab('pClassif',this)">&#127941; Classifica&#231;&#245;es</button>
     </div>
   </div>
   <div class="page-wrap">
@@ -371,6 +372,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
     <div id="pAnalise" class="tab-pane"></div>
     <div id="pEstudos" class="tab-pane"></div>
     <div id="pEvolucao" class="tab-pane"></div>
+    <div id="pClassif" class="tab-pane"></div>
   </div>
 </div>
 
@@ -1190,6 +1192,7 @@ function openDashboard(a, data, examId) {
   buildAnalise(a, avgs);
   buildPlano(a, avgs);
   buildEvolucao(a);
+  buildClassificacoes(a);
   window.scrollTo(0,0);
 }
 
@@ -2074,6 +2077,80 @@ function buildEvolucao(a) {
         '</div>' +
       '</div>' +
     '</div></div>';
+}
+
+// ============================================================
+// CLASSIFICAÇÕES — posição nos dois simulados
+// ============================================================
+function buildClassificacoes(a) {
+  const s1 = RAW_S1.find(x => x.ra === a.ra);
+  const s2 = RAW_S2.find(x => x.ra === a.ra);
+
+  const concBadge = {
+    A: '<span class="badge b-ex">A</span>',
+    B: '<span class="badge b-bo">B</span>',
+    C: '<span class="badge b-re">C</span>',
+    D: '<span class="badge b-ru">D</span>',
+    E: '<span class="badge b-ru">E</span>'
+  };
+
+  const mkRow = (label, cur, prev) => {
+    if (!cur) return '<tr style="opacity:.4"><td style="text-align:left;padding:10px 12px;font-weight:700">' + label + '</td><td colspan="4" style="text-align:center;color:var(--t3);font-size:12px">Não realizado</td></tr>';
+    const d = prev ? prev.rank - cur.rank : null;
+    const ds = d === null ? '—'
+      : d > 0 ? '<span style="color:#16a34a;font-weight:900">↑ ' + d + ' pos.</span>'
+      : d < 0 ? '<span style="color:#dc2626;font-weight:900">↓ ' + Math.abs(d) + ' pos.</span>'
+      : '<span style="color:#9ca3af">Igual</span>';
+    return '<tr>' +
+      '<td style="text-align:left;padding:10px 12px;font-weight:700">' + label + '</td>' +
+      '<td style="text-align:center;font-weight:900;font-size:18px">#' + cur.rank + 'º</td>' +
+      '<td style="text-align:center">' + ds + '</td>' +
+      '<td style="text-align:center;font-weight:700">' + cur.tot + '/60</td>' +
+      '<td style="text-align:center">' + (concBadge[cur.conc] || cur.conc) + '</td>' +
+      '</tr>';
+  };
+
+  const thead = '<thead><tr>' +
+    '<th style="text-align:left;padding-left:12px">Simulado</th>' +
+    '<th>Classificação</th><th>Variação</th><th>Acertos</th><th>Conceito</th>' +
+    '</tr></thead>';
+
+  const rows = mkRow('1º Simulado (25/02/2026)', s1, null) +
+               mkRow('2º Simulado (04/03/2026)', s2, s1);
+
+  const rankDelta = s1 && s2 ? s1.rank - s2.rank : null;
+  const totDelta  = s1 && s2 ? s2.tot - s1.tot : null;
+
+  let resumo = '';
+  if (rankDelta !== null) {
+    const rCol = rankDelta > 0 ? '#16a34a' : rankDelta < 0 ? '#dc2626' : '#6b7280';
+    const tCol = totDelta  > 0 ? '#16a34a' : totDelta  < 0 ? '#dc2626' : '#6b7280';
+    resumo =
+      '<div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">' +
+        '<div style="flex:1;min-width:130px;text-align:center;background:var(--gbg);border:1px solid var(--border);border-radius:10px;padding:14px">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Variação de posição</div>' +
+          '<div style="font-size:28px;font-weight:900;color:' + rCol + '">' +
+            (rankDelta > 0 ? '↑ +' + rankDelta : rankDelta < 0 ? '↓ ' + rankDelta : '—') +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--t3);margin-top:4px">S1 → S2</div>' +
+        '</div>' +
+        '<div style="flex:1;min-width:130px;text-align:center;background:var(--gbg);border:1px solid var(--border);border-radius:10px;padding:14px">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Variação de acertos</div>' +
+          '<div style="font-size:28px;font-weight:900;color:' + tCol + '">' +
+            (totDelta > 0 ? '+' + totDelta : totDelta) +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--t3);margin-top:4px">pontos</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  document.getElementById('pClassif').innerHTML =
+    '<div class="card" style="margin-top:20px">' +
+      '<div class="card-head"><h2>&#127941; Classificações</h2></div>' +
+      '<p class="card-sub">Posição nos simulados UERJ &middot; ↑ subiu &middot; ↓ caiu posições</p>' +
+      '<table class="ranking-table" style="margin-top:12px">' + thead + '<tbody>' + rows + '</tbody></table>' +
+      resumo +
+    '</div>';
 }
 </script>
 </body>
