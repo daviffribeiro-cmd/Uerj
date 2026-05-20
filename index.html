@@ -227,6 +227,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
       <button class="nav-btn" id="navS2" onclick="goSec('s2',this)">&#127942; Simulado 2</button>
       <button class="nav-btn" id="navS3" onclick="goSec('s3',this)">&#127942; Simulado 3</button>
       <button class="nav-btn" id="navS4" onclick="goSec('s4',this)">&#127942; Simulado 4</button>
+      <button class="nav-btn" id="navS5" onclick="goSec('s5',this)">&#127942; Simulado 5</button>
       <button class="nav-btn" id="navBusca" onclick="goSec('busca',this)">&#128269; Buscar</button>
     </nav>
   </div>
@@ -412,6 +413,52 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
         <tbody id="bodyS4"></tbody>
       </table>
       <div class="stat-grid" id="statsS4" style="margin-top:20px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIMULADO 5 -->
+<div id="s5Section" class="section">
+  <div class="page-wrap fade-in">
+    <div class="page-intro">
+      <h1>&#127942; Simulado 5 &mdash; 13/05/2026</h1>
+      <p>Clique em um aluno para ver o relat&oacute;rio individual com notas detalhadas.</p>
+    </div>
+    <div class="legend-box">
+      <strong>Como ler:</strong>
+      <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Top 3 em dourado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>&#10003; Nota A = &ge; 43 acertos</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>&#10007; Abaixo de A = &lt; 43 acertos</div>
+    </div>
+    <div class="ranking-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+        <div>
+          <h2 style="font-size:18px;font-weight:900;color:var(--navy);margin-bottom:2px">UERJ &mdash; Simulado 5 &middot; 13/05/2026</h2>
+          <p style="font-size:13px;color:var(--text3)">Total: <span id="totalS5">0</span> &middot; Nota A: <span id="aprovS5" style="color:var(--green);font-weight:700">0</span> &middot; Abaixo de A: <span id="reprovS5" style="color:var(--red);font-weight:700">0</span></p>
+        </div>
+        <input class="search-input" style="max-width:280px;margin:0" type="text" id="searchS5" placeholder="&#128269; Buscar pelo nome..." oninput="renderS5()">
+      </div>
+      <div class="ranking-filters">
+        <button class="filter-btn active" onclick="setFS5('todos',this)">&#127942; Todos<span class="fb-desc">Turma completa</span></button>
+        <button class="filter-btn" onclick="setFS5('aprov',this)">&#9989; Nota A<span class="fb-desc">&ge; 43 acertos</span></button>
+        <button class="filter-btn" onclick="setFS5('reprov',this)">&#10060; Abaixo de A<span class="fb-desc">Precisam melhorar</span></button>
+        <button class="filter-btn" onclick="setFS5('unidade',this)">&#127979; Por Unidade<span class="fb-desc">Filtrar unidade</span></button>
+      </div>
+      <div id="uniWrapS5" style="display:none;margin-bottom:14px">
+        <select id="uniSelS5" onchange="renderS5()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;font-weight:600;background:var(--white);cursor:pointer;outline:none;color:var(--text)">
+          <option value="">-- Todas as unidades --</option>
+        </select>
+      </div>
+      <table class="ranking-table">
+        <thead><tr>
+          <th style="width:60px;text-align:center">Pos.</th>
+          <th style="text-align:left;padding-left:14px">Aluno</th>
+          <th>Acertos</th>
+          <th>Conceito</th>
+        </tr></thead>
+        <tbody id="bodyS5"></tbody>
+      </table>
+      <div class="stat-grid" id="statsS5" style="margin-top:20px"></div>
     </div>
   </div>
 </div>
@@ -1313,11 +1360,117 @@ const RAW_S4 = [
 {uni:"NOVA IGUACU",nome:"BEATRIZ CARVALHO",ra:"MT24163735",rank:169,por:0,lit:1,le:1,mat:2,fis:1,qui:3,bio:0,geo:2,his:0,tot:10,conc:"E"}
 ];
 
+const RAW_S5 = [
+{uni:"ROCHA MIRANDA",nome:"VITOR PEREIRA",ra:"MT23129554",rank:1,por:7,lit:7,le:5,mat:6,fis:5,qui:7,bio:3,geo:6,his:7,tot:53,conc:"A"},
+{uni:"MADUREIRA",nome:"JOAO CHAVES",ra:"MT25183690",rank:2,por:8,lit:8,le:5,mat:7,fis:5,qui:3,bio:2,geo:6,his:5,tot:49,conc:"A"},
+{uni:"MADUREIRA",nome:"GIULIANA MARTINS",ra:"MT24156416",rank:3,por:8,lit:8,le:5,mat:6,fis:3,qui:4,bio:2,geo:6,his:5,tot:47,conc:"A"},
+{uni:"MADUREIRA",nome:"GUILHERME SILVA",ra:"MT25182379",rank:3,por:7,lit:8,le:5,mat:6,fis:3,qui:3,bio:2,geo:7,his:6,tot:47,conc:"A"},
+{uni:"TAQUARA",nome:"LETICIA OLIVEIRA",ra:"MT20030672",rank:5,por:7,lit:8,le:5,mat:5,fis:3,qui:5,bio:2,geo:6,his:5,tot:46,conc:"A"},
+{uni:"SAO JOAO DE MERITI",nome:"RAPHAELA BLANCO",ra:"MT23127749",rank:5,por:8,lit:8,le:4,mat:4,fis:4,qui:5,bio:3,geo:5,his:5,tot:46,conc:"A"},
+{uni:"DUQUE DE CAXIAS",nome:"ANDRESSA MELLO",ra:"MT23131238",rank:7,por:7,lit:8,le:3,mat:5,fis:1,qui:7,bio:3,geo:6,his:5,tot:45,conc:"A"},
+{uni:"ROCHA MIRANDA",nome:"PEDRO SILVA",ra:"MT22061568",rank:7,por:7,lit:8,le:4,mat:4,fis:3,qui:6,bio:1,geo:6,his:6,tot:45,conc:"A"},
+{uni:"TAQUARA",nome:"FELIPPE ARRUDA",ra:"MT24149247",rank:7,por:7,lit:8,le:3,mat:5,fis:4,qui:3,bio:2,geo:6,his:7,tot:45,conc:"A"},
+{uni:"MADUREIRA",nome:"DAVI TOLEDO",ra:"MT25182619",rank:10,por:8,lit:8,le:5,mat:6,fis:3,qui:3,bio:2,geo:5,his:4,tot:44,conc:"A"},
+{uni:"MADUREIRA",nome:"MARCELO MELLO",ra:"MT24161366",rank:10,por:8,lit:7,le:2,mat:4,fis:2,qui:6,bio:2,geo:6,his:7,tot:44,conc:"A"},
+{uni:"SAO JOAO DE MERITI",nome:"JULIA CROCE",ra:"MT23129984",rank:10,por:8,lit:7,le:4,mat:3,fis:3,qui:6,bio:1,geo:7,his:5,tot:44,conc:"A"},
+{uni:"SAO JOAO DE MERITI",nome:"LAURA VIEIRA",ra:"MT23119019",rank:10,por:8,lit:7,le:3,mat:3,fis:3,qui:5,bio:3,geo:6,his:6,tot:44,conc:"A"},
+{uni:"NOVA IGUACU",nome:"BEATRIZ NEVES",ra:"MT24138919",rank:14,por:6,lit:8,le:2,mat:6,fis:3,qui:7,bio:3,geo:4,his:4,tot:43,conc:"A"},
+{uni:"DUQUE DE CAXIAS",nome:"DANIELLE TORRES",ra:"MT24155046",rank:14,por:8,lit:8,le:4,mat:3,fis:1,qui:6,bio:2,geo:6,his:5,tot:43,conc:"A"},
+{uni:"MADUREIRA",nome:"EMILY SILVA",ra:"MT24151888",rank:14,por:6,lit:8,le:4,mat:2,fis:3,qui:6,bio:3,geo:5,his:6,tot:43,conc:"A"},
+{uni:"SAO JOAO DE MERITI",nome:"MOISES GARCIA",ra:"MT23105166",rank:14,por:8,lit:8,le:3,mat:5,fis:2,qui:4,bio:1,geo:6,his:6,tot:43,conc:"A"},
+{uni:"TAQUARA",nome:"ANGELINA AGUIAR",ra:"MT25152745",rank:14,por:7,lit:8,le:4,mat:3,fis:1,qui:4,bio:4,geo:7,his:5,tot:43,conc:"A"},
+{uni:"ROCHA MIRANDA",nome:"VINICIUS GONCALVES",ra:"MT23126709",rank:14,por:7,lit:7,le:4,mat:6,fis:3,qui:3,bio:2,geo:6,his:5,tot:43,conc:"A"},
+{uni:"DUQUE DE CAXIAS",nome:"JULIA MAGALHAES",ra:"MT21063813",rank:20,por:7,lit:8,le:3,mat:5,fis:1,qui:5,bio:2,geo:6,his:5,tot:42,conc:"B"},
+{uni:"MADUREIRA",nome:"GABRIELA MALHEIROS",ra:"MT25182643",rank:20,por:8,lit:8,le:4,mat:4,fis:2,qui:3,bio:2,geo:5,his:6,tot:42,conc:"B"},
+{uni:"ROCHA MIRANDA",nome:"RAFAEL OLIVEIRA",ra:"MT22093926",rank:20,por:6,lit:7,le:3,mat:7,fis:3,qui:6,bio:2,geo:5,his:3,tot:42,conc:"B"},
+{uni:"DUQUE DE CAXIAS",nome:"GABRIELLE MACHADO",ra:"MT24154502",rank:20,por:8,lit:7,le:5,mat:2,fis:2,qui:6,bio:1,geo:5,his:6,tot:42,conc:"B"},
+{uni:"MADUREIRA",nome:"ANA SOUZA",ra:"MT25182387",rank:20,por:8,lit:7,le:3,mat:5,fis:3,qui:5,bio:2,geo:5,his:4,tot:42,conc:"B"},
+{uni:"BANGU",nome:"THIAGO OZORIO",ra:"MT24137325",rank:20,por:6,lit:7,le:3,mat:3,fis:4,qui:4,bio:4,geo:6,his:5,tot:42,conc:"B"},
+{uni:"NOVA IGUACU",nome:"PAULO DIAS",ra:"MT24143893",rank:27,por:7,lit:8,le:3,mat:3,fis:2,qui:6,bio:3,geo:3,his:6,tot:41,conc:"B"},
+{uni:"NOVA IGUACU",nome:"CLARA FREITAS",ra:"MT22089478",rank:27,por:7,lit:8,le:3,mat:5,fis:5,qui:5,bio:1,geo:4,his:3,tot:41,conc:"B"},
+{uni:"ROCHA MIRANDA",nome:"ESTER SOUZA",ra:"MT22057913",rank:27,por:7,lit:8,le:3,mat:7,fis:1,qui:4,bio:2,geo:6,his:3,tot:41,conc:"B"},
+{uni:"MADUREIRA",nome:"YURI BERNARDO",ra:"MT25182015",rank:27,por:7,lit:8,le:2,mat:5,fis:3,qui:4,bio:3,geo:5,his:4,tot:41,conc:"B"},
+{uni:"NOVA IGUACU",nome:"GUILHERME SOARES",ra:"MT23128127",rank:27,por:7,lit:8,le:4,mat:2,fis:1,qui:3,bio:4,geo:6,his:6,tot:41,conc:"B"},
+{uni:"NOVA IGUACU",nome:"ANA CARVALHO",ra:"MT23128754",rank:27,por:8,lit:7,le:3,mat:4,fis:1,qui:7,bio:3,geo:2,his:6,tot:41,conc:"B"},
+{uni:"CAMPO GRANDE",nome:"CAIO CORREA",ra:"MT23131709",rank:27,por:8,lit:7,le:2,mat:4,fis:4,qui:3,bio:3,geo:5,his:5,tot:41,conc:"B"},
+{uni:"NOVA IGUACU",nome:"ANA LUBE",ra:"MT26201780",rank:34,por:8,lit:8,le:3,mat:4,fis:1,qui:5,bio:2,geo:5,his:4,tot:40,conc:"B"},
+{uni:"TAQUARA",nome:"ANA SILVA",ra:"MT24164055",rank:34,por:8,lit:8,le:3,mat:1,fis:2,qui:5,bio:4,geo:5,his:4,tot:40,conc:"B"},
+{uni:"ROCHA MIRANDA",nome:"GABRIEL CLEMENTE",ra:"MT22058002",rank:34,por:6,lit:8,le:3,mat:3,fis:2,qui:4,bio:3,geo:6,his:5,tot:40,conc:"B"},
+{uni:"TIJUCA",nome:"ARTHUR SANTOS",ra:"MT25180753",rank:34,por:7,lit:8,le:2,mat:4,fis:3,qui:3,bio:2,geo:7,his:4,tot:40,conc:"B"},
+{uni:"NOVA IGUACU",nome:"GABRIEL RIBEIRO",ra:"MT26203315",rank:34,por:8,lit:7,le:3,mat:5,fis:3,qui:2,bio:4,geo:4,his:4,tot:40,conc:"B"},
+{uni:"MADUREIRA",nome:"RAKELLI CAMSTEDT",ra:"MT22102826",rank:34,por:7,lit:6,le:5,mat:5,fis:3,qui:3,bio:3,geo:4,his:4,tot:40,conc:"B"},
+{uni:"ROCHA MIRANDA",nome:"FELIPE ZALMA",ra:"MT22093942",rank:40,por:8,lit:8,le:3,mat:3,fis:2,qui:2,bio:2,geo:5,his:6,tot:39,conc:"B"},
+{uni:"TAQUARA",nome:"JULIA ARANTES",ra:"MT21066295",rank:40,por:8,lit:7,le:2,mat:3,fis:3,qui:5,bio:1,geo:6,his:4,tot:39,conc:"B"},
+{uni:"MADUREIRA",nome:"GIOVANNA ANTONIO",ra:"MT23121874",rank:42,por:8,lit:8,le:4,mat:3,fis:1,qui:4,bio:2,geo:4,his:4,tot:38,conc:"B"},
+{uni:"CAMPO GRANDE",nome:"ISABELA RAPOSO",ra:"MT26203984",rank:42,por:8,lit:8,le:1,mat:6,fis:1,qui:3,bio:4,geo:3,his:4,tot:38,conc:"B"},
+{uni:"TAQUARA",nome:"LUCAS OLIVEIRA",ra:"MT20033171",rank:42,por:6,lit:8,le:4,mat:5,fis:3,qui:3,bio:2,geo:5,his:2,tot:38,conc:"B"},
+{uni:"BANGU",nome:"GUILHERME PAIVA",ra:"MT19022276",rank:42,por:6,lit:8,le:4,mat:2,fis:4,qui:3,bio:2,geo:6,his:3,tot:38,conc:"B"},
+{uni:"TAQUARA",nome:"JOAO MAURICIO",ra:"MT24135162",rank:46,por:8,lit:8,le:5,mat:0,fis:1,qui:1,bio:2,geo:6,his:6,tot:37,conc:"B"},
+{uni:"MADUREIRA",nome:"LUISA REIS",ra:"MT23120488",rank:46,por:7,lit:7,le:1,mat:5,fis:3,qui:4,bio:1,geo:5,his:4,tot:37,conc:"B"},
+{uni:"MADUREIRA",nome:"JULIA MORAES",ra:"MT25186297",rank:48,por:6,lit:8,le:0,mat:4,fis:1,qui:4,bio:2,geo:6,his:5,tot:36,conc:"C"},
+{uni:"NOVA IGUACU",nome:"ANA TEPERINO",ra:"MT20038915",rank:48,por:7,lit:8,le:4,mat:2,fis:2,qui:4,bio:1,geo:5,his:3,tot:36,conc:"C"},
+{uni:"NOVA IGUACU",nome:"MARIA SILVA",ra:"MT24144172",rank:48,por:7,lit:7,le:3,mat:3,fis:1,qui:3,bio:3,geo:5,his:4,tot:36,conc:"C"},
+{uni:"DUQUE DE CAXIAS",nome:"FABIO TAVARES",ra:"MT20028924",rank:48,por:7,lit:6,le:3,mat:4,fis:1,qui:4,bio:2,geo:5,his:4,tot:36,conc:"C"},
+{uni:"NOVA IGUACU",nome:"ISABELA LIMA",ra:"MT24158693",rank:48,por:7,lit:6,le:5,mat:4,fis:2,qui:2,bio:0,geo:5,his:5,tot:36,conc:"C"},
+{uni:"DUQUE DE CAXIAS",nome:"EVELLYN PEREIRA",ra:"MT23127574",rank:53,por:6,lit:8,le:2,mat:2,fis:1,qui:5,bio:0,geo:7,his:4,tot:35,conc:"C"},
+{uni:"ROCHA MIRANDA",nome:"BEATRIZ PEIXOTO",ra:"MT24151979",rank:53,por:6,lit:8,le:2,mat:3,fis:1,qui:2,bio:3,geo:5,his:5,tot:35,conc:"C"},
+{uni:"TAQUARA",nome:"GABRIELA GUERRA",ra:"MT24143125",rank:53,por:6,lit:8,le:3,mat:3,fis:2,qui:2,bio:3,geo:5,his:3,tot:35,conc:"C"},
+{uni:"CAMPO GRANDE",nome:"ANNA CARDOSO",ra:"MT24141749",rank:53,por:7,lit:8,le:1,mat:6,fis:1,qui:1,bio:1,geo:5,his:5,tot:35,conc:"C"},
+{uni:"MADUREIRA",nome:"SILVIO ROCHA",ra:"MT25169954",rank:53,por:7,lit:6,le:4,mat:5,fis:0,qui:4,bio:2,geo:4,his:3,tot:35,conc:"C"},
+{uni:"TIJUCA",nome:"GIOVANNA XAVIER",ra:"MT25197674",rank:59,por:7,lit:8,le:3,mat:5,fis:4,qui:3,bio:1,geo:1,his:2,tot:34,conc:"C"},
+{uni:"ROCHA MIRANDA",nome:"NATHALIA LOURENCO",ra:"MT24151763",rank:59,por:5,lit:8,le:4,mat:4,fis:1,qui:3,bio:1,geo:4,his:4,tot:34,conc:"C"},
+{uni:"NOVA IGUACU",nome:"ANNA CONCEICAO",ra:"MT24139826",rank:59,por:8,lit:8,le:3,mat:2,fis:1,qui:3,bio:1,geo:5,his:3,tot:34,conc:"C"},
+{uni:"NOVA IGUACU",nome:"ROGER LUCENA",ra:"MT24149726",rank:59,por:7,lit:8,le:3,mat:4,fis:1,qui:1,bio:1,geo:5,his:4,tot:34,conc:"C"},
+{uni:"NOVA IGUACU",nome:"MARIANA GANDRA",ra:"MT23108160",rank:59,por:6,lit:8,le:3,mat:2,fis:3,qui:1,bio:1,geo:6,his:4,tot:34,conc:"C"},
+{uni:"NOVA IGUACU",nome:"LIVIA SOUZA",ra:"MT24143943",rank:59,por:6,lit:7,le:3,mat:2,fis:1,qui:5,bio:1,geo:5,his:4,tot:34,conc:"C"},
+{uni:"MADUREIRA",nome:"JULIA SILVA",ra:"MT21070339",rank:59,por:6,lit:7,le:2,mat:2,fis:3,qui:4,bio:1,geo:5,his:4,tot:34,conc:"C"},
+{uni:"DUQUE DE CAXIAS",nome:"SOPHIA REIS",ra:"MT26204321",rank:59,por:6,lit:6,le:3,mat:3,fis:2,qui:0,bio:3,geo:6,his:5,tot:34,conc:"C"},
+{uni:"TAQUARA",nome:"BRENDA FERREIRA",ra:"MT24138075",rank:67,por:6,lit:8,le:3,mat:4,fis:1,qui:4,bio:1,geo:5,his:1,tot:33,conc:"C"},
+{uni:"MADUREIRA",nome:"MARIA SOUZA",ra:"MT23127558",rank:67,por:8,lit:8,le:1,mat:2,fis:0,qui:2,bio:2,geo:6,his:4,tot:33,conc:"C"},
+{uni:"DUQUE DE CAXIAS",nome:"ALLANA MEDEIROS",ra:"MT25167255",rank:67,por:7,lit:8,le:3,mat:0,fis:1,qui:2,bio:3,geo:6,his:3,tot:33,conc:"C"},
+{uni:"ROCHA MIRANDA",nome:"MANUELA ARAUJO",ra:"MT25197021",rank:67,por:5,lit:7,le:2,mat:5,fis:2,qui:2,bio:0,geo:5,his:5,tot:33,conc:"C"},
+{uni:"NOVA IGUACU",nome:"JOAO GOUVEIA",ra:"MT20032314",rank:71,por:4,lit:8,le:2,mat:4,fis:2,qui:3,bio:0,geo:5,his:4,tot:32,conc:"C"},
+{uni:"MADUREIRA",nome:"JULIA MASSAD",ra:"MT24152332",rank:71,por:7,lit:8,le:2,mat:4,fis:1,qui:3,bio:0,geo:4,his:3,tot:32,conc:"C"},
+{uni:"SAO JOAO DE MERITI",nome:"QUEZIA FERREIRA",ra:"MT21039045",rank:71,por:6,lit:7,le:1,mat:3,fis:1,qui:5,bio:1,geo:4,his:4,tot:32,conc:"C"},
+{uni:"TAQUARA",nome:"MIGUEL BRANDAO",ra:"MT21047782",rank:71,por:7,lit:7,le:2,mat:3,fis:1,qui:2,bio:0,geo:6,his:4,tot:32,conc:"C"},
+{uni:"ROCHA MIRANDA",nome:"FELIPPE BARBOSA",ra:"MT23124092",rank:71,por:7,lit:6,le:3,mat:5,fis:2,qui:5,bio:0,geo:2,his:2,tot:32,conc:"C"},
+{uni:"ROCHA MIRANDA",nome:"ANA FERREIRA",ra:"MT24155756",rank:71,por:8,lit:6,le:3,mat:1,fis:1,qui:3,bio:1,geo:4,his:5,tot:32,conc:"C"},
+{uni:"ROCHA MIRANDA",nome:"GIOVANNA ARRUDA",ra:"MT24158222",rank:78,por:8,lit:8,le:1,mat:2,fis:0,qui:1,bio:0,geo:5,his:6,tot:31,conc:"C"},
+{uni:"SAO JOAO DE MERITI",nome:"VITOR GONCALVES",ra:"MT24136566",rank:78,por:7,lit:7,le:3,mat:2,fis:1,qui:2,bio:3,geo:5,his:1,tot:31,conc:"C"},
+{uni:"RETIRO DOS ARTISTAS",nome:"GABRIEL SOUZA",ra:"MT25193251",rank:80,por:5,lit:7,le:2,mat:3,fis:1,qui:3,bio:2,geo:5,his:2,tot:30,conc:"D"},
+{uni:"SAO JOAO DE MERITI",nome:"LAYZA SILVA",ra:"MT23120520",rank:80,por:7,lit:7,le:3,mat:3,fis:0,qui:3,bio:1,geo:4,his:2,tot:30,conc:"D"},
+{uni:"TAQUARA",nome:"LUAN COSTA",ra:"MT23123235",rank:80,por:5,lit:6,le:2,mat:3,fis:1,qui:3,bio:0,geo:6,his:4,tot:30,conc:"D"},
+{uni:"SAO JOAO DE MERITI",nome:"JULIA SILVA",ra:"MT24134389",rank:86,por:5,lit:8,le:1,mat:2,fis:1,qui:1,bio:1,geo:4,his:4,tot:27,conc:"D"},
+{uni:"TAQUARA",nome:"LARA BORGES",ra:"MT21071451",rank:86,por:6,lit:5,le:1,mat:4,fis:2,qui:1,bio:1,geo:5,his:2,tot:27,conc:"D"},
+{uni:"SAO JOAO DE MERITI",nome:"MARIA COSTA",ra:"MT23132178",rank:86,por:7,lit:1,le:0,mat:2,fis:1,qui:3,bio:3,geo:6,his:4,tot:27,conc:"D"},
+{uni:"DUQUE DE CAXIAS",nome:"BERNARDO GIRARDI",ra:"MT24162083",rank:89,por:6,lit:8,le:3,mat:3,fis:0,qui:1,bio:3,geo:1,his:1,tot:26,conc:"D"},
+{uni:"MADUREIRA",nome:"GIOVANA SCHETTINI",ra:"MT25182791",rank:91,por:6,lit:7,le:2,mat:3,fis:1,qui:2,bio:1,geo:1,his:1,tot:24,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"VITORIA SILVA",ra:"MT23118136",rank:91,por:5,lit:7,le:0,mat:2,fis:2,qui:1,bio:1,geo:2,his:4,tot:24,conc:"E"},
+{uni:"NOVA IGUACU",nome:"GIULIANA FERREIRA",ra:"MT26202432",rank:93,por:6,lit:6,le:2,mat:1,fis:0,qui:1,bio:2,geo:4,his:1,tot:23,conc:"E"},
+{uni:"TIJUCA",nome:"GABRIEL SILVA",ra:"MT25181108",rank:93,por:5,lit:3,le:0,mat:3,fis:1,qui:2,bio:2,geo:4,his:3,tot:23,conc:"E"},
+{uni:"ROCHA MIRANDA",nome:"LEANDRA LIMA",ra:"MT22058796",rank:95,por:5,lit:6,le:0,mat:2,fis:1,qui:1,bio:1,geo:5,his:0,tot:21,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"KAUE VIEIRA",ra:"MT24136160",rank:95,por:3,lit:3,le:1,mat:5,fis:2,qui:2,bio:1,geo:1,his:3,tot:21,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"MARIA CIPRIANO",ra:"MT23124647",rank:95,por:3,lit:3,le:3,mat:5,fis:1,qui:0,bio:0,geo:3,his:3,tot:21,conc:"E"},
+{uni:"RETIRO DOS ARTISTAS",nome:"BERNARDO ALCANTARA",ra:"MT25199076",rank:99,por:4,lit:2,le:1,mat:4,fis:2,qui:2,bio:0,geo:3,his:2,tot:20,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"YASMIN SILVA",ra:"MT22097372",rank:99,por:5,lit:2,le:0,mat:2,fis:3,qui:1,bio:1,geo:2,his:4,tot:20,conc:"E"},
+{uni:"TAQUARA",nome:"SOFIA HARDOIM",ra:"MT23113194",rank:101,por:7,lit:7,le:1,mat:4,fis:0,qui:0,bio:0,geo:0,his:0,tot:19,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"ARTHUR CABRAL",ra:"MT23120546",rank:101,por:4,lit:1,le:0,mat:3,fis:2,qui:2,bio:2,geo:3,his:2,tot:19,conc:"E"},
+{uni:"RETIRO DOS ARTISTAS",nome:"GABRIEL OLIVEIRA",ra:"MT25183146",rank:104,por:2,lit:2,le:2,mat:2,fis:2,qui:2,bio:1,geo:3,his:2,tot:18,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"FERNANDO DIAS",ra:"MT24136533",rank:105,por:3,lit:4,le:0,mat:3,fis:2,qui:1,bio:1,geo:0,his:2,tot:16,conc:"E"},
+{uni:"ROCHA MIRANDA",nome:"JULIANA RIBEIRO",ra:"MT23134158",rank:105,por:1,lit:4,le:2,mat:2,fis:2,qui:0,bio:0,geo:3,his:2,tot:16,conc:"E"},
+{uni:"TIJUCA",nome:"VITORIA TEIXEIRA",ra:"MT25184557",rank:107,por:2,lit:1,le:2,mat:1,fis:2,qui:3,bio:1,geo:2,his:1,tot:15,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"JOAO AMADO",ra:"MT21036785",rank:107,por:3,lit:1,le:1,mat:3,fis:1,qui:2,bio:2,geo:2,his:0,tot:15,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"PEDRO COSTA",ra:"MT23127723",rank:109,por:1,lit:3,le:1,mat:2,fis:0,qui:2,bio:1,geo:2,his:2,tot:14,conc:"E"},
+{uni:"BANGU",nome:"PEDRO FRANCA",ra:"MT25172313",rank:110,por:3,lit:1,le:2,mat:0,fis:1,qui:1,bio:1,geo:1,his:3,tot:13,conc:"E"},
+{uni:"TIJUCA",nome:"DAVI DIAS",ra:"MT25181033",rank:111,por:0,lit:3,le:2,mat:1,fis:2,qui:0,bio:2,geo:1,his:1,tot:12,conc:"E"},
+{uni:"SAO JOAO DE MERITI",nome:"ANNY NASCIMENTO",ra:"MT21041017",rank:111,por:3,lit:0,le:1,mat:0,fis:1,qui:1,bio:1,geo:4,his:1,tot:12,conc:"E"}
+];
+
 // ============================================================
 // STATE
 // ============================================================
 let _section = 's1';
-let _fS1 = 'todos', _fS2 = 'todos', _fS3 = 'todos', _fS4 = 'todos';
+let _fS1 = 'todos', _fS2 = 'todos', _fS3 = 'todos', _fS4 = 'todos', _fS5 = 'todos';
 let _pendingRA = null;
 let _currentAluno = null;
 
@@ -1334,10 +1487,12 @@ let _currentAluno = null;
   fillUniSel(RAW_S2, 'uniSelS2');
   fillUniSel(RAW_S3, 'uniSelS3');
   fillUniSel(RAW_S4, 'uniSelS4');
+  fillUniSel(RAW_S5, 'uniSelS5');
   renderS1();
   renderS2();
   renderS3();
   renderS4();
+  renderS5();
 })();
 
 // ============================================================
@@ -1382,6 +1537,13 @@ function setFS4(f, btn) {
   document.getElementById('uniWrapS4').style.display = f === 'unidade' ? 'block' : 'none';
   renderS4();
 }
+function setFS5(f, btn) {
+  _fS5 = f;
+  document.querySelectorAll('#s5Section .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('uniWrapS5').style.display = f === 'unidade' ? 'block' : 'none';
+  renderS5();
+}
 
 // ============================================================
 // RENDER
@@ -1405,6 +1567,11 @@ function renderS4() {
   const sv = document.getElementById('searchS4').value;
   const uv = document.getElementById('uniSelS4').value;
   renderExam(RAW_S4, 'bodyS4', 'statsS4', 'totalS4', 'aprovS4', 'reprovS4', _fS4, sv, uv, 4);
+}
+function renderS5() {
+  const sv = document.getElementById('searchS5').value;
+  const uv = document.getElementById('uniSelS5').value;
+  renderExam(RAW_S5, 'bodyS5', 'statsS5', 'totalS5', 'aprovS5', 'reprovS5', _fS5, sv, uv, 5);
 }
 
 function renderExam(data, bodyId, statsId, totalId, aprovId, reprovId, filtro, searchVal, uniVal, examId) {
@@ -1474,7 +1641,7 @@ function confirmarRA() {
     const ra = _pendingRA.ra;
     const examId = _pendingRA.examId;
     fecharRAModal();
-    const dataMap = {1:RAW_S1,2:RAW_S2,3:RAW_S3,4:RAW_S4};
+    const dataMap = {1:RAW_S1,2:RAW_S2,3:RAW_S3,4:RAW_S4,5:RAW_S5};
     const data = dataMap[examId] || RAW_S1;
     const aluno = data.find(a => a.ra === ra);
     if (aluno) openDashboard(aluno, data, examId);
@@ -1523,7 +1690,7 @@ function openDashboard(a, data, examId) {
   const N = sorted.length;
 
   document.getElementById('dashNome').textContent = a.nome;
-  const _dateMap = {1:'25/02',2:'04/03',3:'11/04',4:'06/05'};
+  const _dateMap = {1:'25/02',2:'04/03',3:'11/04',4:'06/05',5:'13/05'};
   document.getElementById('dashInfo').textContent = a.uni + ' \u00b7 ' + a.ra + ' \u00b7 Simulado ' + examId + ' (' + (_dateMap[examId]||'') + '/2026)';
   const destDiv = document.getElementById('destDiv');
   if (pos <= 10) {
@@ -2126,7 +2293,7 @@ function showSug() {
   const div = document.getElementById('sugDiv');
   if (q.length < 2) { div.innerHTML=''; return; }
   const seen = new Set();
-  const all = [...RAW_S1, ...RAW_S2, ...RAW_S3, ...RAW_S4].filter(a => { if(seen.has(a.ra)) return false; seen.add(a.ra); return true; });
+  const all = [...RAW_S1, ...RAW_S2, ...RAW_S3, ...RAW_S4, ...RAW_S5].filter(a => { if(seen.has(a.ra)) return false; seen.add(a.ra); return true; });
   const matches = all.filter(a => a.nome.toLowerCase().includes(q)).slice(0, 8);
   div.innerHTML = matches.map(a =>
     '<div class="sug-item" onclick="selecionarAluno(\'' + a.ra + '\',\'' + a.nome.replace(/'/g,"\\'") + '\')">' +
@@ -2141,11 +2308,13 @@ function selecionarAluno(ra, nome) {
   const inS2 = RAW_S2.find(a=>a.ra===ra);
   const inS3 = RAW_S3.find(a=>a.ra===ra);
   const inS4 = RAW_S4.find(a=>a.ra===ra);
+  const inS5 = RAW_S5.find(a=>a.ra===ra);
   let btns = '';
   if (inS1) btns += '<button class="btn-search" style="margin-top:8px" onclick="acessarDashboard(\'' + ra + '\',1)">&#128203; Ver Simulado 1 (25/02)</button>';
   if (inS2) btns += '<button class="btn-search" style="margin-top:8px;background:var(--navy2)" onclick="acessarDashboard(\'' + ra + '\',2)">&#128203; Ver Simulado 2 (04/03)</button>';
   if (inS3) btns += '<button class="btn-search" style="margin-top:8px;background:#1c3560" onclick="acessarDashboard(\'' + ra + '\',3)">&#128203; Ver Simulado 3 (11/04)</button>';
   if (inS4) btns += '<button class="btn-search" style="margin-top:8px;background:#0d2137" onclick="acessarDashboard(\'' + ra + '\',4)">&#128203; Ver Simulado 4 (06/05)</button>';
+  if (inS5) btns += '<button class="btn-search" style="margin-top:8px;background:#071525" onclick="acessarDashboard(\'' + ra + '\',5)">&#128203; Ver Simulado 5 (13/05)</button>';
   document.getElementById('buscaResult').innerHTML = btns || '<p style="color:var(--text3);font-size:13px">Aluno n\u00e3o encontrado.</p>';
 }
 
@@ -2171,7 +2340,8 @@ function buildEvolucao(a) {
     {raw:RAW_S1,label:'Sim 1',date:'25/02'},
     {raw:RAW_S2,label:'Sim 2',date:'04/03'},
     {raw:RAW_S3,label:'Sim 3',date:'11/04'},
-    {raw:RAW_S4,label:'Sim 4',date:'06/05'}
+    {raw:RAW_S4,label:'Sim 4',date:'06/05'},
+    {raw:RAW_S5,label:'Sim 5',date:'13/05'}
   ];
   const points = ALL_SIMS.map((s,i) => { const r = s.raw.find(x=>x.ra===a.ra); return r ? {sim:i+1,label:s.label,date:s.date,d:r} : null; }).filter(Boolean);
 
@@ -2187,7 +2357,7 @@ function buildEvolucao(a) {
     return;
   }
 
-  const ALL_RAWS = [RAW_S1, RAW_S2, RAW_S3, RAW_S4];
+  const ALL_RAWS = [RAW_S1, RAW_S2, RAW_S3, RAW_S4, RAW_S5];
   const DISC_COLORS = ['#1e3a5f','#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#db2877','#0891b2','#65a30d'];
   const pFirst = points[0], pLast = points[points.length-1];
   const tot1 = pFirst.d.tot, tot2 = pLast.d.tot;
@@ -2450,9 +2620,9 @@ function buildEvolucao(a) {
 // ============================================================
 function buildRelatorio(a, avgs, pos, N, examId) {
   const firstName = a.nome.split(' ')[0];
-  const _simLabels = {1:'1º Simulado (25/02/2026)',2:'2º Simulado (04/03/2026)',3:'3º Simulado (11/04/2026)',4:'4º Simulado (06/05/2026)'};
+  const _simLabels = {1:'1º Simulado (25/02/2026)',2:'2º Simulado (04/03/2026)',3:'3º Simulado (11/04/2026)',4:'4º Simulado (06/05/2026)',5:'5º Simulado (13/05/2026)'};
   const simLabel = _simLabels[examId] || (examId + 'º Simulado');
-  const _prevRaw = {2:RAW_S1,3:RAW_S2,4:RAW_S3};
+  const _prevRaw = {2:RAW_S1,3:RAW_S2,4:RAW_S3,5:RAW_S4};
   const prev = _prevRaw[examId] ? _prevRaw[examId].find(x => x.ra === a.ra) : null;
 
   const icB = function(pt) {
