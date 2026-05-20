@@ -2759,8 +2759,13 @@ function buildRelatorio(a, avgs, pos, N, examId) {
 
 // ============================================================
 function buildClassificacoes(a) {
-  const s1 = RAW_S1.find(x => x.ra === a.ra);
-  const s2 = RAW_S2.find(x => x.ra === a.ra);
+  const ALL_SIMS = [
+    {raw:RAW_S1,label:'1º Simulado (25/02/2026)',short:'S1'},
+    {raw:RAW_S2,label:'2º Simulado (04/03/2026)',short:'S2'},
+    {raw:RAW_S3,label:'3º Simulado (11/04/2026)',short:'S3'},
+    {raw:RAW_S4,label:'4º Simulado (06/05/2026)',short:'S4'},
+    {raw:RAW_S5,label:'5º Simulado (13/05/2026)',short:'S5'}
+  ];
 
   const concBadge = {
     A: '<span class="badge b-ex">A</span>',
@@ -2769,6 +2774,8 @@ function buildClassificacoes(a) {
     D: '<span class="badge b-ru">D</span>',
     E: '<span class="badge b-ru">E</span>'
   };
+
+  const results = ALL_SIMS.map(s => s.raw.find(x => x.ra === a.ra) || null);
 
   const mkRow = (label, cur, prev) => {
     if (!cur) return '<tr style="opacity:.4"><td style="text-align:left;padding:10px 12px;font-weight:700">' + label + '</td><td colspan="4" style="text-align:center;color:var(--t3);font-size:12px">Não realizado</td></tr>';
@@ -2781,7 +2788,7 @@ function buildClassificacoes(a) {
       '<td style="text-align:left;padding:10px 12px;font-weight:700">' + label + '</td>' +
       '<td style="text-align:center;font-weight:900;font-size:18px">#' + cur.rank + 'º</td>' +
       '<td style="text-align:center">' + ds + '</td>' +
-      '<td style="text-align:center;font-weight:700">' + cur.tot + '/60</td>' +
+      '<td style="text-align:center;font-weight:700">' + cur.tot + '</td>' +
       '<td style="text-align:center">' + (concBadge[cur.conc] || cur.conc) + '</td>' +
       '</tr>';
   };
@@ -2791,16 +2798,23 @@ function buildClassificacoes(a) {
     '<th>Classificação</th><th>Variação</th><th>Acertos</th><th>Conceito</th>' +
     '</tr></thead>';
 
-  const rows = mkRow('1º Simulado (25/02/2026)', s1, null) +
-               mkRow('2º Simulado (04/03/2026)', s2, s1);
+  let rows = '';
+  for (let i = 0; i < ALL_SIMS.length; i++) {
+    const prev = results.slice(0, i).reverse().find(r => r !== null) || null;
+    rows += mkRow(ALL_SIMS[i].label, results[i], prev);
+  }
 
-  const rankDelta = s1 && s2 ? s1.rank - s2.rank : null;
-  const totDelta  = s1 && s2 ? s2.tot - s1.tot : null;
-
+  const participated = results.map((r, i) => r ? {r, i} : null).filter(Boolean);
   let resumo = '';
-  if (rankDelta !== null) {
+  if (participated.length >= 2) {
+    const first = participated[0];
+    const last  = participated[participated.length - 1];
+    const rankDelta = first.r.rank - last.r.rank;
+    const totDelta  = last.r.tot  - first.r.tot;
     const rCol = rankDelta > 0 ? '#16a34a' : rankDelta < 0 ? '#dc2626' : '#6b7280';
     const tCol = totDelta  > 0 ? '#16a34a' : totDelta  < 0 ? '#dc2626' : '#6b7280';
+    const fromLabel = ALL_SIMS[first.i].short;
+    const toLabel   = ALL_SIMS[last.i].short;
     resumo =
       '<div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">' +
         '<div style="flex:1;min-width:130px;text-align:center;background:var(--gbg);border:1px solid var(--border);border-radius:10px;padding:14px">' +
@@ -2808,7 +2822,7 @@ function buildClassificacoes(a) {
           '<div style="font-size:28px;font-weight:900;color:' + rCol + '">' +
             (rankDelta > 0 ? '↑ +' + rankDelta : rankDelta < 0 ? '↓ ' + rankDelta : '—') +
           '</div>' +
-          '<div style="font-size:11px;color:var(--t3);margin-top:4px">S1 → S2</div>' +
+          '<div style="font-size:11px;color:var(--t3);margin-top:4px">' + fromLabel + ' → ' + toLabel + '</div>' +
         '</div>' +
         '<div style="flex:1;min-width:130px;text-align:center;background:var(--gbg);border:1px solid var(--border);border-radius:10px;padding:14px">' +
           '<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Variação de acertos</div>' +
@@ -2823,7 +2837,7 @@ function buildClassificacoes(a) {
   document.getElementById('pClassif').innerHTML =
     '<div class="card" style="margin-top:20px">' +
       '<div class="card-head"><h2>&#127941; Classificações</h2></div>' +
-      '<p class="card-sub">Posição nos simulados UERJ &middot; ↑ subiu &middot; ↓ caiu posições</p>' +
+      '<p class="card-sub">Posição nos simulados UERJ · ↑ subiu · ↓ caiu posições</p>' +
       '<table class="ranking-table" style="margin-top:12px">' + thead + '<tbody>' + rows + '</tbody></table>' +
       resumo +
     '</div>';
