@@ -228,6 +228,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
       <button class="nav-btn" id="navS3" onclick="goSec('s3',this)">&#127942; Simulado 3</button>
       <button class="nav-btn" id="navS4" onclick="goSec('s4',this)">&#127942; Simulado 4</button>
       <button class="nav-btn" id="navS5" onclick="goSec('s5',this)">&#127942; Simulado 5</button>
+      <button class="nav-btn" id="navS6" onclick="goSec('s6',this)">&#127942; Simulado 6</button>
       <button class="nav-btn" id="navBusca" onclick="goSec('busca',this)">&#128269; Buscar</button>
     </nav>
   </div>
@@ -463,6 +464,52 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
   </div>
 </div>
 
+<!-- SIMULADO 6 -->
+<div id="s6Section" class="section">
+  <div class="page-wrap fade-in">
+    <div class="page-intro">
+      <h1>&#127942; Simulado 6 &mdash; 20/05/2026</h1>
+      <p>Clique em um aluno para ver o relat&oacute;rio individual com notas detalhadas.</p>
+    </div>
+    <div class="legend-box">
+      <strong>Como ler:</strong>
+      <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Top 3 em dourado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>&#10003; Nota A = &ge; 43 acertos</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>&#10007; Abaixo de A = &lt; 43 acertos</div>
+    </div>
+    <div class="ranking-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+        <div>
+          <h2 style="font-size:18px;font-weight:900;color:var(--navy);margin-bottom:2px">UERJ &mdash; Simulado 6 &middot; 20/05/2026</h2>
+          <p style="font-size:13px;color:var(--text3)">Total: <span id="totalS6">0</span> &middot; Nota A: <span id="aprovS6" style="color:var(--green);font-weight:700">0</span> &middot; Abaixo de A: <span id="reprovS6" style="color:var(--red);font-weight:700">0</span></p>
+        </div>
+        <input class="search-input" style="max-width:280px;margin:0" type="text" id="searchS6" placeholder="&#128269; Buscar pelo nome..." oninput="renderS6()">
+      </div>
+      <div class="ranking-filters">
+        <button class="filter-btn active" onclick="setFS6('todos',this)">&#127942; Todos<span class="fb-desc">Turma completa</span></button>
+        <button class="filter-btn" onclick="setFS6('aprov',this)">&#9989; Nota A<span class="fb-desc">&ge; 43 acertos</span></button>
+        <button class="filter-btn" onclick="setFS6('reprov',this)">&#10060; Abaixo de A<span class="fb-desc">Precisam melhorar</span></button>
+        <button class="filter-btn" onclick="setFS6('unidade',this)">&#127979; Por Unidade<span class="fb-desc">Filtrar unidade</span></button>
+      </div>
+      <div id="uniWrapS6" style="display:none;margin-bottom:14px">
+        <select id="uniSelS6" onchange="renderS6()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;font-weight:600;background:var(--white);cursor:pointer;outline:none;color:var(--text)">
+          <option value="">-- Todas as unidades --</option>
+        </select>
+      </div>
+      <table class="ranking-table">
+        <thead><tr>
+          <th style="width:60px;text-align:center">Pos.</th>
+          <th style="text-align:left;padding-left:14px">Aluno</th>
+          <th>Acertos</th>
+          <th>Conceito</th>
+        </tr></thead>
+        <tbody id="bodyS6"></tbody>
+      </table>
+      <div class="stat-grid" id="statsS6" style="margin-top:20px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- BUSCA -->
 <div id="buscaSection" class="section">
   <div class="page-wrap fade-in">
@@ -539,6 +586,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
   </div>
 </div>
 
+<script src="raw_s6.js"></script>
 <script>
 const RAW_S1 = [
 {uni:"ROCHA MIRANDA",nome:"VITOR PEREIRA",ra:"MT23129554",rank:1,por:7,lit:5,le:5,mat:8,fis:3,qui:6,bio:3,geo:7,his:6,tot:50,conc:"A"},
@@ -1470,7 +1518,7 @@ const RAW_S5 = [
 // STATE
 // ============================================================
 let _section = 's1';
-let _fS1 = 'todos', _fS2 = 'todos', _fS3 = 'todos', _fS4 = 'todos', _fS5 = 'todos';
+let _fS1 = 'todos', _fS2 = 'todos', _fS3 = 'todos', _fS4 = 'todos', _fS5 = 'todos', _fS6 = 'todos';
 let _pendingRA = null;
 let _currentAluno = null;
 
@@ -1488,11 +1536,13 @@ let _currentAluno = null;
   fillUniSel(RAW_S3, 'uniSelS3');
   fillUniSel(RAW_S4, 'uniSelS4');
   fillUniSel(RAW_S5, 'uniSelS5');
+  fillUniSel(RAW_S6, 'uniSelS6');
   renderS1();
   renderS2();
   renderS3();
   renderS4();
   renderS5();
+  renderS6();
 })();
 
 // ============================================================
@@ -1544,6 +1594,13 @@ function setFS5(f, btn) {
   document.getElementById('uniWrapS5').style.display = f === 'unidade' ? 'block' : 'none';
   renderS5();
 }
+function setFS6(f, btn) {
+  _fS6 = f;
+  document.querySelectorAll('#s6Section .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('uniWrapS6').style.display = f === 'unidade' ? 'block' : 'none';
+  renderS6();
+}
 
 // ============================================================
 // RENDER
@@ -1572,6 +1629,11 @@ function renderS5() {
   const sv = document.getElementById('searchS5').value;
   const uv = document.getElementById('uniSelS5').value;
   renderExam(RAW_S5, 'bodyS5', 'statsS5', 'totalS5', 'aprovS5', 'reprovS5', _fS5, sv, uv, 5);
+}
+function renderS6() {
+  const sv = document.getElementById('searchS6').value;
+  const uv = document.getElementById('uniSelS6').value;
+  renderExam(RAW_S6, 'bodyS6', 'statsS6', 'totalS6', 'aprovS6', 'reprovS6', _fS6, sv, uv, 6);
 }
 
 function renderExam(data, bodyId, statsId, totalId, aprovId, reprovId, filtro, searchVal, uniVal, examId) {
@@ -1641,7 +1703,7 @@ function confirmarRA() {
     const ra = _pendingRA.ra;
     const examId = _pendingRA.examId;
     fecharRAModal();
-    const dataMap = {1:RAW_S1,2:RAW_S2,3:RAW_S3,4:RAW_S4,5:RAW_S5};
+    const dataMap = {1:RAW_S1,2:RAW_S2,3:RAW_S3,4:RAW_S4,5:RAW_S5,6:RAW_S6};
     const data = dataMap[examId] || RAW_S1;
     const aluno = data.find(a => a.ra === ra);
     if (aluno) openDashboard(aluno, data, examId);
@@ -2293,7 +2355,7 @@ function showSug() {
   const div = document.getElementById('sugDiv');
   if (q.length < 2) { div.innerHTML=''; return; }
   const seen = new Set();
-  const all = [...RAW_S1, ...RAW_S2, ...RAW_S3, ...RAW_S4, ...RAW_S5].filter(a => { if(seen.has(a.ra)) return false; seen.add(a.ra); return true; });
+  const all = [...RAW_S1, ...RAW_S2, ...RAW_S3, ...RAW_S4, ...RAW_S5, ...RAW_S6].filter(a => { if(seen.has(a.ra)) return false; seen.add(a.ra); return true; });
   const matches = all.filter(a => a.nome.toLowerCase().includes(q)).slice(0, 8);
   div.innerHTML = matches.map(a =>
     '<div class="sug-item" onclick="selecionarAluno(\'' + a.ra + '\',\'' + a.nome.replace(/'/g,"\\'") + '\')">' +
@@ -2309,12 +2371,14 @@ function selecionarAluno(ra, nome) {
   const inS3 = RAW_S3.find(a=>a.ra===ra);
   const inS4 = RAW_S4.find(a=>a.ra===ra);
   const inS5 = RAW_S5.find(a=>a.ra===ra);
+  const inS6 = RAW_S6.find(a=>a.ra===ra);
   let btns = '';
   if (inS1) btns += '<button class="btn-search" style="margin-top:8px" onclick="acessarDashboard(\'' + ra + '\',1)">&#128203; Ver Simulado 1 (25/02)</button>';
   if (inS2) btns += '<button class="btn-search" style="margin-top:8px;background:var(--navy2)" onclick="acessarDashboard(\'' + ra + '\',2)">&#128203; Ver Simulado 2 (04/03)</button>';
   if (inS3) btns += '<button class="btn-search" style="margin-top:8px;background:#1c3560" onclick="acessarDashboard(\'' + ra + '\',3)">&#128203; Ver Simulado 3 (11/04)</button>';
   if (inS4) btns += '<button class="btn-search" style="margin-top:8px;background:#0d2137" onclick="acessarDashboard(\'' + ra + '\',4)">&#128203; Ver Simulado 4 (06/05)</button>';
   if (inS5) btns += '<button class="btn-search" style="margin-top:8px;background:#071525" onclick="acessarDashboard(\'' + ra + '\',5)">&#128203; Ver Simulado 5 (13/05)</button>';
+  if (inS6) btns += '<button class="btn-search" style="margin-top:8px;background:#040e18" onclick="acessarDashboard(\'' + ra + '\',6)">&#128203; Ver Simulado 6 (20/05)</button>';
   document.getElementById('buscaResult').innerHTML = btns || '<p style="color:var(--text3);font-size:13px">Aluno n\u00e3o encontrado.</p>';
 }
 
@@ -2341,7 +2405,8 @@ function buildEvolucao(a) {
     {raw:RAW_S2,label:'Sim 2',date:'04/03'},
     {raw:RAW_S3,label:'Sim 3',date:'11/04'},
     {raw:RAW_S4,label:'Sim 4',date:'06/05'},
-    {raw:RAW_S5,label:'Sim 5',date:'13/05'}
+    {raw:RAW_S5,label:'Sim 5',date:'13/05'},
+    {raw:RAW_S6,label:'Sim 6',date:'20/05'}
   ];
   const points = ALL_SIMS.map((s,i) => { const r = s.raw.find(x=>x.ra===a.ra); return r ? {sim:i+1,label:s.label,date:s.date,d:r} : null; }).filter(Boolean);
 
@@ -2357,7 +2422,7 @@ function buildEvolucao(a) {
     return;
   }
 
-  const ALL_RAWS = [RAW_S1, RAW_S2, RAW_S3, RAW_S4, RAW_S5];
+  const ALL_RAWS = [RAW_S1, RAW_S2, RAW_S3, RAW_S4, RAW_S5, RAW_S6];
   const DISC_COLORS = ['#1e3a5f','#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#db2877','#0891b2','#65a30d'];
   const pFirst = points[0], pLast = points[points.length-1];
   const tot1 = pFirst.d.tot, tot2 = pLast.d.tot;
@@ -2620,9 +2685,9 @@ function buildEvolucao(a) {
 // ============================================================
 function buildRelatorio(a, avgs, pos, N, examId) {
   const firstName = a.nome.split(' ')[0];
-  const _simLabels = {1:'1º Simulado (25/02/2026)',2:'2º Simulado (04/03/2026)',3:'3º Simulado (11/04/2026)',4:'4º Simulado (06/05/2026)',5:'5º Simulado (13/05/2026)'};
+  const _simLabels = {1:'1º Simulado (25/02/2026)',2:'2º Simulado (04/03/2026)',3:'3º Simulado (11/04/2026)',4:'4º Simulado (06/05/2026)',5:'5º Simulado (13/05/2026)',6:'6º Simulado (20/05/2026)'};
   const simLabel = _simLabels[examId] || (examId + 'º Simulado');
-  const _prevRaw = {2:RAW_S1,3:RAW_S2,4:RAW_S3,5:RAW_S4};
+  const _prevRaw = {2:RAW_S1,3:RAW_S2,4:RAW_S3,5:RAW_S4,6:RAW_S5};
   const prev = _prevRaw[examId] ? _prevRaw[examId].find(x => x.ra === a.ra) : null;
 
   const icB = function(pt) {
@@ -2764,7 +2829,8 @@ function buildClassificacoes(a) {
     {raw:RAW_S2,label:'2º Simulado (04/03/2026)',short:'S2'},
     {raw:RAW_S3,label:'3º Simulado (11/04/2026)',short:'S3'},
     {raw:RAW_S4,label:'4º Simulado (06/05/2026)',short:'S4'},
-    {raw:RAW_S5,label:'5º Simulado (13/05/2026)',short:'S5'}
+    {raw:RAW_S5,label:'5º Simulado (13/05/2026)',short:'S5'},
+    {raw:RAW_S6,label:'6º Simulado (20/05/2026)',short:'S6'}
   ];
 
   const concBadge = {
